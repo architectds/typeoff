@@ -44,12 +44,17 @@ struct KeyboardView: View {
                 Button { handleMicTap() } label: {
                     ZStack {
                         Circle()
-                            .fill(isRecording ? Color.red : Color.blue)
+                            .fill(isRecording ? Color.red : (engine.isModelLoaded ? Color.blue : Color.blue.opacity(0.3)))
                             .frame(width: 52, height: 52)
 
-                        Image(systemName: isRecording ? "mic.slash.fill" : "mic.fill")
-                            .font(.title2)
-                            .foregroundStyle(.white)
+                        if !engine.isModelLoaded {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Image(systemName: isRecording ? "mic.slash.fill" : "mic.fill")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
                 .disabled(!engine.isModelLoaded)
