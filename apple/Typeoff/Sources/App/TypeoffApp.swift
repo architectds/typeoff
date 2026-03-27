@@ -6,6 +6,7 @@ struct TypeoffApp: App {
     @StateObject private var engine = WhisperEngine(modelVariant: "base")
     @StateObject private var trialManager = TrialManager()
     @StateObject private var storeManager = StoreManager()
+    @AppStorage("appearance") private var appearance: String = "system"
 
     var body: some Scene {
         WindowGroup {
@@ -13,10 +14,19 @@ struct TypeoffApp: App {
                 .environmentObject(engine)
                 .environmentObject(trialManager)
                 .environmentObject(storeManager)
+                .preferredColorScheme(colorScheme)
                 .task {
                     await engine.loadModel()
                     await storeManager.loadProducts()
                 }
+        }
+    }
+
+    private var colorScheme: ColorScheme? {
+        switch appearance {
+        case "light": .light
+        case "dark": .dark
+        default: nil
         }
     }
 }
@@ -35,17 +45,32 @@ struct ContentView: View {
 }
 
 struct MainTabView: View {
-    var body: some View {
-        TabView {
-            NotesView()
-                .tabItem {
-                    Label("Notes", systemImage: "note.text")
-                }
 
+    @State private var selectedTab = 1  // Start on Notes (center)
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape")
+                    Image(systemName: "gearshape")
+                    Text("Settings")
                 }
+                .tag(0)
+
+            NotesView()
+                .tabItem {
+                    Image(systemName: "note.text")
+                    Text("Notes")
+                }
+                .tag(1)
+
+            ProfileView()
+                .tabItem {
+                    Image(systemName: "person")
+                    Text("Profile")
+                }
+                .tag(2)
         }
+        .tint(Theme.primary)
     }
 }

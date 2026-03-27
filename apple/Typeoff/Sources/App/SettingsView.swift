@@ -10,93 +10,105 @@ struct SettingsView: View {
     private var silenceDuration: Double = 5.0
 
     var body: some View {
-        NavigationStack {
-            Form {
+        ScrollView {
+            VStack(spacing: 32) {
+                // Header
+                VStack(spacing: 4) {
+                    Text("Settings")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundStyle(Theme.onSurface)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .sectionContainer()
+                .padding(.top, 16)
+
                 // Keyboard setup
-                Section {
-                    Link(destination: URL(string: UIApplication.openSettingsURLString)!) {
-                        HStack {
-                            Label("Enable Typeoff Keyboard", systemImage: "keyboard")
-                            Spacer()
-                            Image(systemName: "arrow.up.forward.app")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                keyboardSection
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Settings → General → Keyboard → Keyboards → Add New Keyboard → Typeoff")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                } header: {
-                    Text("Keyboard")
-                }
+                // Precision
+                precisionSection
 
-                // Precision picker
-                Section {
-                    ForEach(Precision.allCases) { precision in
-                        precisionRow(precision)
-                    }
+                // Transcription
+                transcriptionSection
 
-                    if engine.isDownloading {
-                        HStack {
-                            ProgressView()
-                                .padding(.trailing, 4)
-                            Text(engine.loadingProgress)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                } header: {
-                    Text("Precision")
-                } footer: {
-                    Text("Higher precision is more accurate but uses more storage and is slightly slower.")
-                }
-
-                Section("Transcription") {
-                    VStack(alignment: .leading) {
-                        Text("Silence timeout: \(Int(silenceDuration))s")
-                        Slider(value: $silenceDuration, in: 3...15, step: 1)
-                    }
-                }
-
-                Section("Account") {
-                    if trialManager.isPurchased {
-                        Label("Typeoff Unlimited", systemImage: "checkmark.seal.fill")
-                            .foregroundStyle(.green)
-                    } else if trialManager.isTrialActive {
-                        let days = trialManager.trialDaysRemaining
-                        Label("Trial: \(days) day\(days == 1 ? "" : "s") left", systemImage: "clock")
-                            .foregroundStyle(.orange)
-
-                        Button("Unlock — $9.99") {
-                            Task { await storeManager.purchase() }
-                        }
-                    } else {
-                        Label("Trial expired", systemImage: "lock.fill")
-                            .foregroundStyle(.red)
-
-                        Button("Unlock — $9.99") {
-                            Task { await storeManager.purchase() }
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-
-                    Button("Restore Purchase") {
-                        Task { await storeManager.restorePurchases() }
-                    }
-                    .foregroundStyle(.secondary)
-                }
-
-                Section("About") {
-                    LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
-                }
+                Spacer(minLength: 40)
             }
-            .navigationTitle("Settings")
         }
+        .background(Theme.surface)
     }
 
-    // MARK: - Precision row
+    // MARK: - Keyboard
+
+    private var keyboardSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Theme.headline("KEYBOARD")
+                .padding(.leading, 4)
+
+            VStack(spacing: 0) {
+                Link(destination: URL(string: UIApplication.openSettingsURLString)!) {
+                    HStack {
+                        Image(systemName: "keyboard")
+                            .font(.body)
+                            .foregroundStyle(Theme.primary)
+                            .frame(width: 32)
+
+                        Text("Enable Typeoff Keyboard")
+                            .font(.body)
+                            .foregroundStyle(Theme.onSurface)
+
+                        Spacer()
+
+                        Image(systemName: "arrow.up.forward")
+                            .font(.caption)
+                            .foregroundStyle(Theme.onSurfaceVariant)
+                    }
+                    .padding(16)
+                }
+
+                Text("Settings → General → Keyboard → Keyboards → Add New Keyboard → Typeoff")
+                    .font(.caption)
+                    .foregroundStyle(Theme.onSurfaceVariant)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+            }
+            .background(Theme.surfaceContainerLowest)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+        }
+        .sectionContainer()
+    }
+
+    // MARK: - Precision
+
+    private var precisionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Theme.headline("PRECISION")
+                .padding(.leading, 4)
+
+            VStack(spacing: 2) {
+                ForEach(Precision.allCases) { precision in
+                    precisionRow(precision)
+                }
+            }
+            .background(Theme.surfaceContainerLowest)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+
+            if engine.isDownloading {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text(engine.loadingProgress)
+                        .font(.caption)
+                        .foregroundStyle(Theme.onSurfaceVariant)
+                }
+                .padding(.leading, 4)
+            }
+
+            Text("Higher precision is more accurate but uses more storage and loads slower.")
+                .font(.caption)
+                .foregroundStyle(Theme.onSurfaceVariant)
+                .padding(.leading, 4)
+        }
+        .sectionContainer()
+    }
 
     private func precisionRow(_ precision: Precision) -> some View {
         Button {
@@ -104,32 +116,62 @@ struct SettingsView: View {
             Task { await engine.loadModel(precision: precision) }
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(precision.label)
-                        .foregroundStyle(.primary)
+                        .font(.body)
+                        .foregroundStyle(Theme.onSurface)
                     Text("\(precision.sizeLabel) · \(precision.loadTimeHint)")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.onSurfaceVariant)
                 }
 
                 Spacer()
 
                 if engine.activePrecision == precision && engine.isModelLoaded {
-                    // Active
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Theme.success)
                 } else if engine.downloadedModels.contains(precision) {
-                    // Downloaded but not active
-                    Image(systemName: "circle")
-                        .foregroundStyle(.secondary)
+                    Circle()
+                        .strokeBorder(Theme.onSurfaceVariant.opacity(0.3), lineWidth: 1.5)
+                        .frame(width: 22, height: 22)
                 } else {
-                    // Not downloaded — will trigger download
                     Image(systemName: "arrow.down.circle")
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Theme.primary)
                 }
             }
+            .padding(16)
         }
         .disabled(engine.isDownloading)
+    }
+
+    // MARK: - Transcription
+
+    private var transcriptionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Theme.headline("TRANSCRIPTION")
+                .padding(.leading, 4)
+
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Silence timeout")
+                            .font(.body)
+                            .foregroundStyle(Theme.onSurface)
+                        Spacer()
+                        Text("\(Int(silenceDuration))s")
+                            .font(.body.monospacedDigit())
+                            .foregroundStyle(Theme.onSurfaceVariant)
+                    }
+
+                    Slider(value: $silenceDuration, in: 3...15, step: 1)
+                        .tint(Theme.primary)
+                }
+                .padding(16)
+            }
+            .background(Theme.surfaceContainerLowest)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+        }
+        .sectionContainer()
     }
 }
 

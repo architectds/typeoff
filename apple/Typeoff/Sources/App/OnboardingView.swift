@@ -14,123 +14,152 @@ struct OnboardingView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
+        .background(Theme.surface)
     }
 
     // MARK: - Pages
 
     private var welcomePage: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 28) {
             Spacer()
 
             Image(systemName: "mic.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(.blue)
+                .font(.system(size: 56, weight: .light))
+                .foregroundStyle(Theme.primary)
 
-            Text("Typeoff")
-                .font(.largeTitle.bold())
+            VStack(spacing: 8) {
+                Text("Typeoff")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundStyle(Theme.onSurface)
 
-            Text("Voice to text.\nOffline. Private. Forever.")
-                .font(.title3)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                Text("Voice to text.\nOffline. Private. Forever.")
+                    .font(.system(size: 18))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Theme.onSurfaceVariant)
+                    .lineSpacing(4)
+            }
 
             Spacer()
 
             Button("Get Started") {
                 withAnimation { currentPage = 1 }
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .font(.body.weight(.semibold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Theme.primaryGradient)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.pillRadius, style: .continuous))
+            .sectionContainer()
 
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 50)
         }
-        .padding()
     }
 
     private var micPermissionPage: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 28) {
             Spacer()
 
             Image(systemName: "mic.badge.plus")
-                .font(.system(size: 60))
+                .font(.system(size: 56, weight: .light))
                 .foregroundStyle(.orange)
 
-            Text("Microphone Access")
-                .font(.title2.bold())
+            VStack(spacing: 8) {
+                Text("Microphone Access")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Theme.onSurface)
 
-            Text("Typeoff needs microphone access to hear your voice. Audio is processed entirely on your device — nothing is sent anywhere.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                Text("Typeoff needs microphone access to hear your voice. Audio is processed entirely on your device.")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Theme.onSurfaceVariant)
+                    .lineSpacing(3)
+                    .padding(.horizontal, 32)
+            }
 
             Spacer()
 
             Button("Allow Microphone") {
                 requestMicPermission()
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .font(.body.weight(.semibold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Theme.primaryGradient)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.pillRadius, style: .continuous))
+            .sectionContainer()
 
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 50)
         }
-        .padding()
     }
 
     private var keyboardSetupPage: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 28) {
             Spacer()
 
             Image(systemName: "keyboard")
-                .font(.system(size: 60))
-                .foregroundStyle(.green)
+                .font(.system(size: 56, weight: .light))
+                .foregroundStyle(Theme.success)
 
             Text("Enable Keyboard")
-                .font(.title2.bold())
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(Theme.onSurface)
 
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 14) {
                 step(number: 1, text: "Open Settings → General → Keyboard")
                 step(number: 2, text: "Tap Keyboards → Add New Keyboard")
                 step(number: 3, text: "Select Typeoff")
                 step(number: 4, text: "Allow Full Access (for microphone)")
             }
-            .padding()
+            .tonalCard(color: Theme.surfaceContainerLowest)
+            .sectionContainer()
 
             Text("Full Access is required for microphone recording. Typeoff never logs keystrokes, never sends data anywhere, and works 100% offline.")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.onSurfaceVariant)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                .padding(.horizontal, 32)
 
             Spacer()
 
-            Button("Done") {
-                hasCompletedOnboarding = true
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            VStack(spacing: 12) {
+                Button("Done") {
+                    hasCompletedOnboarding = true
+                }
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Theme.primaryGradient)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.pillRadius, style: .continuous))
 
-            Button("Skip for now") {
-                hasCompletedOnboarding = true
+                Button("Skip for now") {
+                    hasCompletedOnboarding = true
+                }
+                .font(.subheadline)
+                .foregroundStyle(Theme.onSurfaceVariant)
             }
-            .foregroundStyle(.secondary)
+            .sectionContainer()
 
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 50)
         }
-        .padding()
     }
 
     // MARK: - Helpers
 
     private func step(number: Int, text: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 14) {
             Text("\(number)")
-                .font(.caption.bold())
+                .font(.caption.weight(.bold))
                 .foregroundStyle(.white)
                 .frame(width: 24, height: 24)
-                .background(Circle().fill(Color.blue))
+                .background(Theme.primary)
+                .clipShape(Circle())
 
             Text(text)
                 .font(.body)
+                .foregroundStyle(Theme.onSurface)
         }
     }
 

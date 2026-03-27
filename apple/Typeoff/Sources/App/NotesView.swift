@@ -1,41 +1,57 @@
 import SwiftUI
 
-/// Placeholder notes tab — to be built out.
-/// Will serve as a scratchpad for voice-transcribed text.
+/// Placeholder notes tab — editorial empty state.
 struct NotesView: View {
 
-    @State private var noteText = ""
-
     var body: some View {
-        NavigationStack {
-            VStack {
-                TextEditor(text: $noteText)
-                    .padding(8)
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .padding()
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Notes")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(Theme.onSurface)
 
-                HStack {
-                    Button {
-                        UIPasteboard.general.string = noteText
-                    } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(noteText.isEmpty)
+                Spacer()
 
-                    Button(role: .destructive) {
-                        noteText = ""
-                    } label: {
-                        Label("Clear", systemImage: "trash")
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(noteText.isEmpty)
+                // Disabled + button for now
+                Button {} label: {
+                    Image(systemName: "plus")
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(Theme.onSurfaceVariant.opacity(0.4))
+                        .frame(width: 40, height: 40)
+                        .background(Theme.surfaceContainerLow)
+                        .clipShape(Circle())
                 }
-                .padding(.bottom)
+                .disabled(true)
             }
-            .navigationTitle("Notes")
+            .sectionContainer()
+            .padding(.top, 16)
+
+            Spacer()
+
+            // Empty state — editorial feel
+            VStack(spacing: 16) {
+                Image(systemName: "note.text")
+                    .font(.system(size: 48, weight: .light))
+                    .foregroundStyle(Theme.onSurfaceVariant.opacity(0.3))
+
+                Text("Your voice notes\nwill live here.")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(Theme.onSurfaceVariant.opacity(0.5))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+
+                Text("Coming soon")
+                    .font(.caption)
+                    .foregroundStyle(Theme.onSurfaceVariant.opacity(0.3))
+                    .textCase(.uppercase)
+                    .tracking(1.5)
+            }
+
+            Spacer()
+            Spacer()
         }
+        .background(Theme.surface)
     }
 }
 
