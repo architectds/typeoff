@@ -8,12 +8,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    DEVELOPMENT_TEAM: ""  # Set your team ID here
-
-packages:
-  WhisperKit:
-    url: https://github.com/argmaxinc/WhisperKit.git
-    from: "0.9.0"
+    DEVELOPMENT_TEAM: "2TWV639R43"
+    CODE_SIGN_STYLE: Automatic
 
 targets:
   Typeoff:
@@ -23,8 +19,8 @@ targets:
       - path: Typeoff/Sources/App
       - path: Typeoff/Sources/Engine
       - path: Typeoff/Sources/Store
-    resources:
-      - path: Typeoff/Resources
+      - path: Typeoff/Resources/vocab.json
+        buildPhase: resources
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
@@ -36,11 +32,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.chenbao.typeoff
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
-    dependencies:
-      - target: TypeoffKeyboard
-        embed: true
-      - package: WhisperKit
-        product: WhisperKit
+    # dependencies:
+    #   - target: TypeoffKeyboard
+    #     embed: true
     entitlements:
       path: Typeoff/Typeoff.entitlements
     preBuildScripts: []
