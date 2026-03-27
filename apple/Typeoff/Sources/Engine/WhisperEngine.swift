@@ -22,8 +22,16 @@ final class WhisperEngine: ObservableObject {
         print("[Typeoff] Loading WhisperKit model...")
 
         do {
-            // Let WhisperKit auto-select the best model for this device
-            whisperKit = try await WhisperKit()
+            // Load from bundled models — no network needed
+            let modelPath = Bundle.main.bundlePath + "/WhisperKitModels/openai_whisper-base"
+            print("[Typeoff] Model path: \(modelPath)")
+            print("[Typeoff] Exists: \(FileManager.default.fileExists(atPath: modelPath))")
+            let config = WhisperKitConfig(
+                modelFolder: modelPath,
+                verbose: true,
+                download: false
+            )
+            whisperKit = try await WhisperKit(config)
             isModelLoaded = true
             loadingProgress = ""
             print("[Typeoff] WhisperKit ready")

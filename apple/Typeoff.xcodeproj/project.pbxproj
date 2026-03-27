@@ -14,6 +14,7 @@
 		4C319BE53E179A396D483A06 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674405B1CCF31CAE3C7E0F4E /* StoreManager.swift */; };
 		4C57601B3314B08D898F29AF /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4E9DFE483FA8AED3CD83F4 /* TrialManager.swift */; };
 		621112843038F39CEE0DA2E8 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B255C5C571A1BDC3F04D18A /* KeyboardView.swift */; };
+		6ECCC8896F3A96AFEB20FA1C /* WhisperKitModels in Resources */ = {isa = PBXBuildFile; fileRef = EB2E0D702924031E4D67F441 /* WhisperKitModels */; };
 		991B300B06D9530970B6E386 /* WhisperPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580324C3EAE16A45B06F52FB /* WhisperPipelineTests.swift */; };
 		9C79690273DB266EA6C39808 /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3103FC1497932FC9797515 /* NotesView.swift */; };
 		9EF1EF23037B4C75251F9634 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C3E14FF979E750F50870CF5 /* OnboardingView.swift */; };
@@ -58,6 +59,7 @@
 		DAFFCDFE7635CB0EB450A2D7 /* TypeoffKeyboard.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TypeoffKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0A2F2B1A6F6A59C0AFC37B5 /* Typeoff.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Typeoff.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1EA7A7D28836735F447E458 /* TypeoffTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TypeoffTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB2E0D702924031E4D67F441 /* WhisperKitModels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WhisperKitModels; path = Typeoff/Resources/WhisperKitModels; sourceTree = SOURCE_ROOT; };
 		F8AC1D5F5AFE72CFB24979E3 /* WhisperEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperEngine.swift; sourceTree = "<group>"; };
 		F8F2671B4261324ADD9C0E59 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -145,6 +147,7 @@
 		FA42511AE9E5406C875CFF8D = {
 			isa = PBXGroup;
 			children = (
+				EB2E0D702924031E4D67F441 /* WhisperKitModels */,
 				48D3091BEE6DD2EF6C91BF37 /* App */,
 				65C80FC99E1202B36F6EC10E /* Engine */,
 				6D8CA84926F62AA40BDD370B /* Engine */,
@@ -180,6 +183,7 @@
 			buildConfigurationList = B1B3530056F82388DE1AE0C6 /* Build configuration list for PBXNativeTarget "Typeoff" */;
 			buildPhases = (
 				D619396746420DDBA57031F7 /* Sources */,
+				41D697304FD6DD69FFADE03A /* Resources */,
 				60557DE7DE62E193F5FC208A /* Frameworks */,
 			);
 			buildRules = (
@@ -257,6 +261,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		41D697304FD6DD69FFADE03A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6ECCC8896F3A96AFEB20FA1C /* WhisperKitModels in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5CE4325B90052BA2D3CBFC21 /* Sources */ = {
@@ -416,18 +431,15 @@
 				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = TypeOff;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TypeOff needs microphone access to transcribe your speech. Audio is processed entirely on your device.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Typeoff/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chenbao.typeoff;
+				PRODUCT_NAME = TypeOff;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -516,18 +528,15 @@
 				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = TypeOff;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TypeOff needs microphone access to transcribe your speech. Audio is processed entirely on your device.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Typeoff/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chenbao.typeoff;
+				PRODUCT_NAME = TypeOff;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
