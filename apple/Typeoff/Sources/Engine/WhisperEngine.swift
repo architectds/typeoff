@@ -57,7 +57,11 @@ final class WhisperEngine: ObservableObject {
         let startTime = CFAbsoluteTimeGetCurrent()
 
         do {
-            let result = try await wk.transcribe(audioArray: audioSamples)
+            let options = DecodingOptions(
+                task: .transcribe,
+                language: "zh"  // force Chinese to test
+            )
+            let result = try await wk.transcribe(audioArray: audioSamples, decodeOptions: options)
             let text = result.map { $0.text }.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
             let elapsed = CFAbsoluteTimeGetCurrent() - startTime
             print("[Typeoff] \(String(format: "%.2f", elapsed))s: \"\(text.prefix(80))\"")
