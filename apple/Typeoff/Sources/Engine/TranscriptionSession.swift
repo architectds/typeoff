@@ -20,7 +20,8 @@ final class TranscriptionSession: ObservableObject {
     }
 
     @Published var state: State = .idle
-    @Published var displayText: String = ""
+    @Published var displayText: String = ""   // full text (locked + pending) — for Notes/app use
+    @Published var previewText: String = ""   // pending only — for keyboard preview bar
 
     var engine: WhisperEngine
     private let recorder = AudioRecorder()
@@ -101,12 +102,13 @@ final class TranscriptionSession: ObservableObject {
                 if let sentence = result.newSentence {
                     onSentence?(sentence)
                 }
-                // Update display: locked + pending
+                // Update displays
+                previewText = pendingText  // keyboard: only show uncommitted text
                 if !lockedText.isEmpty || !pendingText.isEmpty {
                     let display = pendingText.isEmpty
                         ? lockedText
                         : (lockedText + " " + pendingText).trimmingCharacters(in: .whitespaces)
-                    displayText = display
+                    displayText = display  // app: full text
                 }
             }
 
@@ -233,6 +235,7 @@ final class TranscriptionSession: ObservableObject {
             let spacedRemainder = lockedText.isEmpty ? finalRemainder : " " + finalRemainder
             onFinalRemainder?(spacedRemainder)
             displayText = (lockedText + spacedRemainder).trimmingCharacters(in: .whitespaces)
+            previewText = ""
         }
 
         state = .done

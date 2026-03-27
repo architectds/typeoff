@@ -106,10 +106,10 @@ struct KeyboardView: View {
             s.start()
             isRecording = true
 
-            // Poll display text for preview bar
+            // Poll pending text for preview bar (only uncommitted text)
             Task {
                 while isRecording {
-                    previewText = s.displayText
+                    previewText = s.previewText
                     try? await Task.sleep(for: .milliseconds(300))
                 }
             }
