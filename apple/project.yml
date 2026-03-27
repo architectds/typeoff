@@ -11,6 +11,11 @@ settings:
     DEVELOPMENT_TEAM: "2TWV639R43"
     CODE_SIGN_STYLE: Automatic
 
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit.git
+    from: "0.9.0"
+
 targets:
   Typeoff:
     type: application
@@ -19,6 +24,9 @@ targets:
       - path: Typeoff/Sources/App
       - path: Typeoff/Sources/Engine
       - path: Typeoff/Sources/Store
+    dependencies:
+      - package: WhisperKit
+        product: WhisperKit
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

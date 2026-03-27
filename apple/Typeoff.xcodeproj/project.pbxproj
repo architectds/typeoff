@@ -67,10 +67,10 @@
 		C401BF13A1A047FDE403647C /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		C4B3D4B1F3C9C9AC3D57AD68 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D1ADBEE23DEE85F3976240B3 /* SilenceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetector.swift; sourceTree = "<group>"; };
-		DAFFCDFE7635CB0EB450A2D7 /* TypeoffKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TypeoffKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAFFCDFE7635CB0EB450A2D7 /* TypeoffKeyboard.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TypeoffKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBCC0DECF4C2BA7EB17982EF /* WhisperTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperTokenizer.swift; sourceTree = "<group>"; };
-		E0A2F2B1A6F6A59C0AFC37B5 /* Typeoff.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Typeoff.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1EA7A7D28836735F447E458 /* TypeoffTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TypeoffTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E0A2F2B1A6F6A59C0AFC37B5 /* Typeoff.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Typeoff.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1EA7A7D28836735F447E458 /* TypeoffTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TypeoffTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E38618CDDA50DCB8B9800CCD /* MelSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MelSpectrogram.swift; sourceTree = "<group>"; };
 		F8AC1D5F5AFE72CFB24979E3 /* WhisperEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperEngine.swift; sourceTree = "<group>"; };
 		F8F2671B4261324ADD9C0E59 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -243,12 +243,15 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					1A11FB3B38C9DE9EE921FBA7 = {
+						DevelopmentTeam = 2TWV639R43;
 						ProvisioningStyle = Automatic;
 					};
 					555DC74C44A20B97A84B9816 = {
+						DevelopmentTeam = 2TWV639R43;
 						ProvisioningStyle = Automatic;
 					};
 					DA7A8C236C1EE542C49CD6F9 = {
+						DevelopmentTeam = 2TWV639R43;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -414,7 +417,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Typeoff/TypeoffKeyboard.entitlements;
-				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Sources/Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -432,7 +434,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -454,7 +455,6 @@
 				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TypeOff;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TypeOff needs microphone access to transcribe your speech. Audio is processed entirely on your device.";
@@ -476,7 +476,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -556,7 +555,6 @@
 				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TypeOff;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TypeOff needs microphone access to transcribe your speech. Audio is processed entirely on your device.";
@@ -578,7 +576,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Typeoff/TypeoffKeyboard.entitlements;
-				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Sources/Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
