@@ -18,7 +18,9 @@ struct KeyboardView: View {
         VStack(spacing: 0) {
             // Preview bar — shows pending (in-progress) text
             if !previewText.isEmpty || !engine.isModelLoaded {
-                Text(engine.isModelLoaded ? previewText : engine.loadingProgress)
+                Text(engine.isModelLoaded
+                     ? previewText
+                     : "Loading \(engine.activePrecision.label) model... \(engine.activePrecision.loadTimeHint)")
                     .font(.caption)
                     .foregroundStyle(engine.isModelLoaded ? .primary : .secondary)
                     .lineLimit(2)

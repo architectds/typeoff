@@ -25,6 +25,14 @@ enum Precision: String, CaseIterable, Identifiable {
         }
     }
 
+    var loadTimeHint: String {
+        switch self {
+        case .standard: "Fastest loading (~1s)"
+        case .better: "Slower loading (~2-3s)"
+        case .best: "Slowest loading (~5-8s)"
+        }
+    }
+
     var whisperKitModel: String {
         "openai_whisper-\(rawValue)"
     }

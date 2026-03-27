@@ -107,7 +107,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(precision.label)
                         .foregroundStyle(.primary)
-                    Text(precision.sizeLabel)
+                    Text("\(precision.sizeLabel) · \(precision.loadTimeHint)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
