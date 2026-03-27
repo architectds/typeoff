@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+*.spec
+
+# Models (large binaries)
+desktop/models/
+
+# macOS
+.DS_Store
+*.xcuserdata
+*.xcworkspace/xcuserdata/
+
+# Xcode build
+apple/build/
+apple/DerivedData/
+
+# IDE
+.idea/
+.vscode/

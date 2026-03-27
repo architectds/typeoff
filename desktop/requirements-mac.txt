@@ -1,0 +1,5 @@
+mlx-whisper>=0.4.0
+sounddevice>=0.4.6
+numpy>=1.24.0
+pynput>=1.7.6
+silero-vad>=5.1
