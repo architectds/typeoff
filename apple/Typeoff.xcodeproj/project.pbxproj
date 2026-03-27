@@ -1,0 +1,491 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		044E73FC579DC061477D9B92 /* AudioPreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06FC7A5280C7DA557043E7C /* AudioPreprocessor.swift */; };
+		153CA8F44D857ADF260E540F /* WhisperPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C1D6DEB533F9032F03B3FA /* WhisperPipeline.swift */; };
+		17D5C202D23A0376111D543D /* WhisperTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09503683DA5AD59D2E9B5A1 /* WhisperTokenizer.swift */; };
+		1EB18A8C4EECA64CFB07BDFB /* AudioPreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06FC7A5280C7DA557043E7C /* AudioPreprocessor.swift */; };
+		20D1B042635B47DB295A013A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7582D293EE1017DD13FA74 /* SettingsView.swift */; };
+		2C338AE700EAF1B812AA4031 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BA79CEFA8E34CF0A3D9AEB /* TrialManager.swift */; };
+		405927EAF6A739D25D07CA83 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20FBD6DF8D52467494F62996 /* PaywallView.swift */; };
+		60A101007EDD3850096B5DC6 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67733FF2A57CF5F3463B45C8 /* OnboardingView.swift */; };
+		6C27ABD5DD8A49025CE26C21 /* WhisperEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F230D893B88B17926E82C8 /* WhisperEngine.swift */; };
+		6D056B6AC840070F1FA83C38 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244441423784A023E935BC7D /* KeyboardView.swift */; };
+		7E24CF1D40F1446DD8DD7430 /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CC11C47A63AFFD8465F1C8 /* NotesView.swift */; };
+		88C270468484FF1B9F2989AB /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71EF2B9B4B565B0C36265E22 /* KeyboardViewController.swift */; };
+		8AC618B2E8384D0F57FA3E72 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E084FD4600AC6C76F614B9F2 /* StoreManager.swift */; };
+		9B2060F64EDBA198AA452644 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055BEA295296B87E6D5865A3 /* AudioRecorder.swift */; };
+		9BEB37E8083CFD746E598EB3 /* TranscriptionSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C051BFE6D14C139BC17B2B3 /* TranscriptionSession.swift */; };
+		A56CE4F6A9441EB5715A5787 /* MelSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76F89EA2B92718CA1B9C4C2A /* MelSpectrogram.swift */; };
+		C30F359290A7E05652FE1EF5 /* MelSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76F89EA2B92718CA1B9C4C2A /* MelSpectrogram.swift */; };
+		C5A3271C15D3CD5DD0B9E207 /* WhisperEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F230D893B88B17926E82C8 /* WhisperEngine.swift */; };
+		C92F9177C9C704446305FBDF /* SilenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD95830F9205F7C45CC45639 /* SilenceDetector.swift */; };
+		D18AACF3B9D87EACB4EEA93B /* TypeoffApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88388F21A139D2F9B1841700 /* TypeoffApp.swift */; };
+		DCFA0BDB2C4B6328A3ED7600 /* TranscriptionSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C051BFE6D14C139BC17B2B3 /* TranscriptionSession.swift */; };
+		E465F5573EA461D9BFCD64B0 /* WhisperPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C1D6DEB533F9032F03B3FA /* WhisperPipeline.swift */; };
+		EA75D6DE09A0348277F25548 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BA79CEFA8E34CF0A3D9AEB /* TrialManager.swift */; };
+		EBA23DD248310E51E0833128 /* SilenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD95830F9205F7C45CC45639 /* SilenceDetector.swift */; };
+		EFFCA10169DEE13A02154252 /* WhisperTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09503683DA5AD59D2E9B5A1 /* WhisperTokenizer.swift */; };
+		FA209B4A2624771DD9CDAC48 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055BEA295296B87E6D5865A3 /* AudioRecorder.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		244BEAE35282BF4B9994ED1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 99CD99DD25A912D2E0A4C0B9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B50EA7BDF96755E5AFFEC175;
+			remoteInfo = Typeoff;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		055BEA295296B87E6D5865A3 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		0C051BFE6D14C139BC17B2B3 /* TranscriptionSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionSession.swift; sourceTree = "<group>"; };
+		20FBD6DF8D52467494F62996 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		244441423784A023E935BC7D /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
+		2C238013B6DC560392138B90 /* Typeoff.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Typeoff.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		58CC11C47A63AFFD8465F1C8 /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
+		67733FF2A57CF5F3463B45C8 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		71EF2B9B4B565B0C36265E22 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		76F89EA2B92718CA1B9C4C2A /* MelSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MelSpectrogram.swift; sourceTree = "<group>"; };
+		7AAB0C029C0E403F5067D00D /* TypeoffKeyboard.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TypeoffKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		88388F21A139D2F9B1841700 /* TypeoffApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeoffApp.swift; sourceTree = "<group>"; };
+		A1F230D893B88B17926E82C8 /* WhisperEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperEngine.swift; sourceTree = "<group>"; };
+		AD95830F9205F7C45CC45639 /* SilenceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetector.swift; sourceTree = "<group>"; };
+		B06FC7A5280C7DA557043E7C /* AudioPreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPreprocessor.swift; sourceTree = "<group>"; };
+		B09503683DA5AD59D2E9B5A1 /* WhisperTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperTokenizer.swift; sourceTree = "<group>"; };
+		E084FD4600AC6C76F614B9F2 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
+		E2BA79CEFA8E34CF0A3D9AEB /* TrialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialManager.swift; sourceTree = "<group>"; };
+		E8C1D6DEB533F9032F03B3FA /* WhisperPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperPipeline.swift; sourceTree = "<group>"; };
+		EE7582D293EE1017DD13FA74 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2B103DF57DAC3FCE84EBABF2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2C238013B6DC560392138B90 /* Typeoff.app */,
+				7AAB0C029C0E403F5067D00D /* TypeoffKeyboard.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		42EDA76A198A478700A1D458 = {
+			isa = PBXGroup;
+			children = (
+				6F3FBD44DF28C3FA94474495 /* App */,
+				8EEB78DDDA9F81AB21CD20A7 /* Engine */,
+				7D0082A0382D1E62E1CC1F8B /* Keyboard */,
+				4DE6BB2C4F86F5162F75F37A /* Store */,
+				2B103DF57DAC3FCE84EBABF2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4DE6BB2C4F86F5162F75F37A /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				E084FD4600AC6C76F614B9F2 /* StoreManager.swift */,
+				E2BA79CEFA8E34CF0A3D9AEB /* TrialManager.swift */,
+			);
+			name = Store;
+			path = Typeoff/Sources/Store;
+			sourceTree = "<group>";
+		};
+		6F3FBD44DF28C3FA94474495 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				58CC11C47A63AFFD8465F1C8 /* NotesView.swift */,
+				67733FF2A57CF5F3463B45C8 /* OnboardingView.swift */,
+				20FBD6DF8D52467494F62996 /* PaywallView.swift */,
+				EE7582D293EE1017DD13FA74 /* SettingsView.swift */,
+				88388F21A139D2F9B1841700 /* TypeoffApp.swift */,
+			);
+			name = App;
+			path = Typeoff/Sources/App;
+			sourceTree = "<group>";
+		};
+		7D0082A0382D1E62E1CC1F8B /* Keyboard */ = {
+			isa = PBXGroup;
+			children = (
+				244441423784A023E935BC7D /* KeyboardView.swift */,
+				71EF2B9B4B565B0C36265E22 /* KeyboardViewController.swift */,
+			);
+			name = Keyboard;
+			path = Typeoff/Sources/Keyboard;
+			sourceTree = "<group>";
+		};
+		8EEB78DDDA9F81AB21CD20A7 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				B06FC7A5280C7DA557043E7C /* AudioPreprocessor.swift */,
+				055BEA295296B87E6D5865A3 /* AudioRecorder.swift */,
+				76F89EA2B92718CA1B9C4C2A /* MelSpectrogram.swift */,
+				AD95830F9205F7C45CC45639 /* SilenceDetector.swift */,
+				0C051BFE6D14C139BC17B2B3 /* TranscriptionSession.swift */,
+				A1F230D893B88B17926E82C8 /* WhisperEngine.swift */,
+				E8C1D6DEB533F9032F03B3FA /* WhisperPipeline.swift */,
+				B09503683DA5AD59D2E9B5A1 /* WhisperTokenizer.swift */,
+			);
+			name = Engine;
+			path = Typeoff/Sources/Engine;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		24B637282DFE3F5640E36909 /* TypeoffKeyboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ADD8E5C673BF9F9D1D7627D0 /* Build configuration list for PBXNativeTarget "TypeoffKeyboard" */;
+			buildPhases = (
+				B0F47C63721D38DB79E4C24E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CEA0ED85B5500A9064C9028C /* PBXTargetDependency */,
+			);
+			name = TypeoffKeyboard;
+			packageProductDependencies = (
+			);
+			productName = TypeoffKeyboard;
+			productReference = 7AAB0C029C0E403F5067D00D /* TypeoffKeyboard.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		B50EA7BDF96755E5AFFEC175 /* Typeoff */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D53BCB7C97F384BB15247CA3 /* Build configuration list for PBXNativeTarget "Typeoff" */;
+			buildPhases = (
+				8878604C2FB72BC813343F9A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Typeoff;
+			packageProductDependencies = (
+			);
+			productName = Typeoff;
+			productReference = 2C238013B6DC560392138B90 /* Typeoff.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		99CD99DD25A912D2E0A4C0B9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					24B637282DFE3F5640E36909 = {
+						DevelopmentTeam = "";
+					};
+					B50EA7BDF96755E5AFFEC175 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = D8ABCCD422B8592F498628DE /* Build configuration list for PBXProject "Typeoff" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 42EDA76A198A478700A1D458;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 2B103DF57DAC3FCE84EBABF2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B50EA7BDF96755E5AFFEC175 /* Typeoff */,
+				24B637282DFE3F5640E36909 /* TypeoffKeyboard */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8878604C2FB72BC813343F9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				044E73FC579DC061477D9B92 /* AudioPreprocessor.swift in Sources */,
+				9B2060F64EDBA198AA452644 /* AudioRecorder.swift in Sources */,
+				A56CE4F6A9441EB5715A5787 /* MelSpectrogram.swift in Sources */,
+				7E24CF1D40F1446DD8DD7430 /* NotesView.swift in Sources */,
+				60A101007EDD3850096B5DC6 /* OnboardingView.swift in Sources */,
+				405927EAF6A739D25D07CA83 /* PaywallView.swift in Sources */,
+				20D1B042635B47DB295A013A /* SettingsView.swift in Sources */,
+				C92F9177C9C704446305FBDF /* SilenceDetector.swift in Sources */,
+				8AC618B2E8384D0F57FA3E72 /* StoreManager.swift in Sources */,
+				DCFA0BDB2C4B6328A3ED7600 /* TranscriptionSession.swift in Sources */,
+				EA75D6DE09A0348277F25548 /* TrialManager.swift in Sources */,
+				D18AACF3B9D87EACB4EEA93B /* TypeoffApp.swift in Sources */,
+				6C27ABD5DD8A49025CE26C21 /* WhisperEngine.swift in Sources */,
+				153CA8F44D857ADF260E540F /* WhisperPipeline.swift in Sources */,
+				EFFCA10169DEE13A02154252 /* WhisperTokenizer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0F47C63721D38DB79E4C24E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EB18A8C4EECA64CFB07BDFB /* AudioPreprocessor.swift in Sources */,
+				FA209B4A2624771DD9CDAC48 /* AudioRecorder.swift in Sources */,
+				6D056B6AC840070F1FA83C38 /* KeyboardView.swift in Sources */,
+				88C270468484FF1B9F2989AB /* KeyboardViewController.swift in Sources */,
+				C30F359290A7E05652FE1EF5 /* MelSpectrogram.swift in Sources */,
+				EBA23DD248310E51E0833128 /* SilenceDetector.swift in Sources */,
+				9BEB37E8083CFD746E598EB3 /* TranscriptionSession.swift in Sources */,
+				2C338AE700EAF1B812AA4031 /* TrialManager.swift in Sources */,
+				C5A3271C15D3CD5DD0B9E207 /* WhisperEngine.swift in Sources */,
+				E465F5573EA461D9BFCD64B0 /* WhisperPipeline.swift in Sources */,
+				17D5C202D23A0376111D543D /* WhisperTokenizer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CEA0ED85B5500A9064C9028C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B50EA7BDF96755E5AFFEC175 /* Typeoff */;
+			targetProxy = 244BEAE35282BF4B9994ED1A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2F4761270B3A9F58218B1792 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		37550F9FAA497EE98497C67E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		521727753062E0DA78FB95F4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Typeoff needs microphone access to transcribe your speech. Audio is processed entirely on your device.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.typeoff.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5691D03B5E98BB37834E6A94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Typeoff needs microphone access to transcribe your speech. Audio is processed entirely on your device.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.typeoff.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		655D89197BDD71D5B57634C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Typeoff/TypeoffKeyboard.entitlements;
+				INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier = "com.apple.keyboard-service";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Typeoff keyboard needs microphone access to transcribe your speech.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.typeoff.app.keyboard;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		97D1B07B013336473335AC2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Typeoff/TypeoffKeyboard.entitlements;
+				INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier = "com.apple.keyboard-service";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Typeoff keyboard needs microphone access to transcribe your speech.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.typeoff.app.keyboard;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ADD8E5C673BF9F9D1D7627D0 /* Build configuration list for PBXNativeTarget "TypeoffKeyboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97D1B07B013336473335AC2D /* Debug */,
+				655D89197BDD71D5B57634C9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D53BCB7C97F384BB15247CA3 /* Build configuration list for PBXNativeTarget "Typeoff" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				521727753062E0DA78FB95F4 /* Debug */,
+				5691D03B5E98BB37834E6A94 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D8ABCCD422B8592F498628DE /* Build configuration list for PBXProject "Typeoff" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2F4761270B3A9F58218B1792 /* Debug */,
+				37550F9FAA497EE98497C67E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 99CD99DD25A912D2E0A4C0B9 /* Project object */;
+}

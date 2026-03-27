@@ -37,6 +37,10 @@ final class TranscriptionSession: ObservableObject {
     // One-sentence buffer: only flush N when N+1 starts confirming
     private var bufferedSentence: String? = nil
 
+    // Delayed trim: only release audio/mel after the buffer is flushed (N+2 safety)
+    private var pendingTrimPoint: Int? = nil  // mel frame index to trim at next flush
+    private var lastTrimPoint: Int? = nil     // trim point from the flush before
+
     private let sampleRate = 16000
     private let rollInterval: TimeInterval = 3.0
     private var rollTask: Task<Void, Never>?
@@ -62,6 +66,8 @@ final class TranscriptionSession: ObservableObject {
         pendingText = ""
         windowStartSample = 0
         bufferedSentence = nil
+        pendingTrimPoint = nil
+        lastTrimPoint = nil
         displayText = ""
         previewText = ""
         state = .recording
@@ -114,8 +120,14 @@ final class TranscriptionSession: ObservableObject {
                     // a new one has started confirming (proves previous was real)
                     if let buffered = bufferedSentence {
                         onSentence?(buffered)
+                        // NOW safe to trim — the flushed sentence's audio is no longer needed
+                        // Keep one extra window of margin for safety
+                        if let trimPoint = lastTrimPoint {
+                            engine.trimMel(beforeFrameIndex: trimPoint)
+                        }
                     }
                     bufferedSentence = sentence
+                    lastTrimPoint = pendingTrimPoint
                 }
                 // Update displays
                 previewText = pendingText  // keyboard: only show uncommitted text
@@ -198,10 +210,8 @@ final class TranscriptionSession: ObservableObject {
                 let slideSamples = Int(ratio * Double(windowAudio.count))
                 windowStartSample += slideSamples
 
-                // Release memory: trim old audio + mel frames that are behind the window
-                // This keeps memory flat even for long recordings
-                let melFrameIndex = slideSamples / 160  // hop_length = 160
-                engine.trimMel(beforeFrameIndex: melFrameIndex)
+                // Don't trim yet — store trim point, will trim when buffer flushes (N+2 safety)
+                pendingTrimPoint = slideSamples / 160  // hop_length = 160
             }
 
             // Reset agreement for new window

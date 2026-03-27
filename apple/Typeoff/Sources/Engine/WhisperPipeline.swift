@@ -1,16 +1,14 @@
 import CoreML
 import Foundation
 
-/// Raw CoreML Whisper pipeline — encoder + greedy decoder.
-/// No WhisperKit dependency. Loads AudioEncoder.mlmodelc + TextDecoder.mlmodelc directly.
+/// Raw CoreML Whisper pipeline — no WhisperKit, no dependencies.
 ///
-/// Architecture:
-///   Audio → MelSpectrogram (Accelerate) → Encoder (CoreML/ANE) → Decoder (CoreML, greedy) → Tokens → Text
-///
-/// Parallelism:
-///   - Mel computed incrementally as audio streams in (zero wait at transcribe time)
-///   - Encoder runs on Neural Engine, decoder on CPU/GPU — different hardware, natural overlap
-///   - Old audio + mel frames released after window slide
+/// Model spec (from argmaxinc/whisperkit-coreml openai_whisper-base):
+///   Encoder input:  melspectrogram_features  Float16 [1, 80, 1, 3000]
+///   Encoder output: encoder_output_embeds    Float16 [1, 512, 1, 1500]
+///   Decoder input:  input_ids, cache_length, key_cache, value_cache,
+///                   kv_cache_update_mask, encoder_output_embeds, decoder_key_padding_mask
+///   Decoder output: logits [1, 1, 51865], key_cache_updates, value_cache_updates
 final class WhisperPipeline {
 
     let tokenizer = WhisperTokenizer()
@@ -20,20 +18,21 @@ final class WhisperPipeline {
     private var decoder: MLModel?
     private(set) var isLoaded = false
 
-    private let maxDecoderTokens = 224  // Max output tokens per chunk
+    private let maxDecoderTokens = 224
+    private let vocabSize = 51865
+    private let kvDim = 3072        // 6 layers * 512 dim = 3072
+    private let maxCacheLength = 224
 
     // MARK: - Model loading
 
-    /// Load encoder + decoder CoreML models.
-    /// Models are .mlmodelc bundles stored in the app's documents or bundle.
+    /// Load encoder + decoder in parallel.
     func load(modelDir: URL) async throws {
         let config = MLModelConfiguration()
-        config.computeUnits = .all  // Neural Engine + GPU + CPU
+        config.computeUnits = .all
 
         let encoderURL = modelDir.appendingPathComponent("AudioEncoder.mlmodelc")
         let decoderURL = modelDir.appendingPathComponent("TextDecoder.mlmodelc")
 
-        // Load both in parallel
         async let enc = MLModel.load(contentsOf: encoderURL, configuration: config)
         async let dec = MLModel.load(contentsOf: decoderURL, configuration: config)
 
@@ -42,11 +41,9 @@ final class WhisperPipeline {
 
         tokenizer.load()
         isLoaded = true
-
-        print("[Typeoff] Pipeline loaded from \(modelDir.lastPathComponent)")
+        print("[Typeoff] Pipeline loaded")
     }
 
-    /// Unload models to free memory.
     func unload() {
         encoder = nil
         decoder = nil
@@ -56,124 +53,230 @@ final class WhisperPipeline {
 
     // MARK: - Transcription
 
-    /// Transcribe audio samples → text.
-    /// If mel frames were precomputed (via streamMel), uses those. Otherwise computes from scratch.
     func transcribe(audioSamples: [Float], language: String? = nil) async -> String {
         guard let encoder = encoder, let decoder = decoder else { return "" }
 
-        // Step 1: Mel spectrogram
+        // Step 1: Mel spectrogram → pad/truncate to 3000 frames (30s)
         let melFrames = melProcessor.processAudioWindow(audioSamples)
         guard !melFrames.isEmpty else { return "" }
 
         // Step 2: Encode
-        guard let encoderOutput = try? await runEncoder(encoder, melFrames: melFrames) else {
+        guard let encoderOutput = try? runEncoder(encoder, melFrames: melFrames) else {
             return ""
         }
 
-        // Step 3: Greedy decode
-        let tokens = try? await greedyDecode(decoder, encoderOutput: encoderOutput, language: language)
-        guard let tokens = tokens, !tokens.isEmpty else { return "" }
+        // Step 3: Greedy decode with KV cache
+        let tokens = (try? greedyDecode(decoder, encoderOutput: encoderOutput, language: language)) ?? []
+        guard !tokens.isEmpty else { return "" }
 
-        // Step 4: Detokenize
+        // Step 4: Tokens → text
         return tokenizer.decode(tokens)
     }
 
-    /// Feed audio to mel processor incrementally (call from recorder callback).
-    /// This precomputes mel frames so transcribe() has zero mel wait.
+    /// Feed audio chunk to mel processor for precomputation.
     func streamMel(_ audioChunk: [Float]) {
         melProcessor.processAudio(audioChunk)
     }
 
-    /// Trim mel frames + signal that audio before this point is released.
-    /// Call after window slide to free memory.
     func trimMel(beforeFrameIndex: Int) {
         melProcessor.trimFrames(before: beforeFrameIndex)
     }
 
     // MARK: - Encoder
 
-    private func runEncoder(_ model: MLModel, melFrames: [[Float]]) async throws -> MLMultiArray {
-        let numFrames = melFrames.count
+    private func runEncoder(_ model: MLModel, melFrames: [[Float]]) throws -> MLMultiArray {
+        // Encoder expects [1, 80, 1, 3000] — pad or truncate mel frames to 3000
+        let targetFrames = 3000
         let nMels = 80
 
-        // Build input: [1, numFrames, 80]
-        let melArray = try MLMultiArray(shape: [1, NSNumber(value: numFrames), NSNumber(value: nMels)], dataType: .float32)
+        let melArray = try MLMultiArray(shape: [1, nMels as NSNumber, 1, targetFrames as NSNumber], dataType: .float16)
 
+        // Zero-fill (padding for short audio)
+        let totalElements = nMels * targetFrames
+        for i in 0..<totalElements {
+            melArray[i] = NSNumber(value: Float16(0))
+        }
+
+        // Fill with actual mel frames: layout is [1, nMels, 1, numFrames]
+        let numFrames = min(melFrames.count, targetFrames)
         for f in 0..<numFrames {
             for m in 0..<nMels {
-                melArray[[0, f, m] as [NSNumber]] = NSNumber(value: melFrames[f][m])
+                // Index: batch(0) * 80*1*3000 + m * 1*3000 + 0 * 3000 + f
+                let idx = m * targetFrames + f
+                melArray[idx] = NSNumber(value: Float16(melFrames[f][m]))
             }
         }
 
-        let input = try MLDictionaryFeatureProvider(dictionary: ["input_features": melArray])
-        let output = try await model.prediction(from: input)
+        let input = try MLDictionaryFeatureProvider(dictionary: [
+            "melspectrogram_features": MLFeatureValue(multiArray: melArray)
+        ])
 
-        // Encoder output: [1, numFrames, hiddenDim]
-        guard let encoderOutput = output.featureValue(for: "encoder_output")?.multiArrayValue
-                ?? output.featureValue(for: "last_hidden_state")?.multiArrayValue else {
+        let output = try model.prediction(from: input)
+
+        guard let encoderOutput = output.featureValue(for: "encoder_output_embeds")?.multiArrayValue else {
             throw PipelineError.encoderOutputMissing
         }
 
         return encoderOutput
     }
 
-    // MARK: - Greedy decoder
+    // MARK: - Greedy decoder with KV cache
 
-    private func greedyDecode(_ model: MLModel, encoderOutput: MLMultiArray, language: String?) async throws -> [Int32] {
-        var tokens = tokenizer.initialTokens(language: language)
+    private func greedyDecode(_ model: MLModel, encoderOutput: MLMultiArray, language: String?) throws -> [Int32] {
+        let initialTokens = tokenizer.initialTokens(language: language)
+
+        // Initialize KV cache (zeros)
+        var keyCache = try MLMultiArray(shape: [1, kvDim as NSNumber, 1, maxCacheLength as NSNumber], dataType: .float16)
+        var valueCache = try MLMultiArray(shape: [1, kvDim as NSNumber, 1, maxCacheLength as NSNumber], dataType: .float16)
+
         var outputTokens: [Int32] = []
+        var cachePos: Int32 = 0
 
+        // Feed initial tokens one by one to fill cache
+        let allTokens = initialTokens
+        for token in allTokens {
+            let result = try runDecoderStep(
+                model,
+                inputId: token,
+                cacheLength: cachePos,
+                keyCache: keyCache,
+                valueCache: valueCache,
+                encoderOutput: encoderOutput
+            )
+            // Update KV cache
+            updateCache(&keyCache, with: result.keyCacheUpdate, at: Int(cachePos))
+            updateCache(&valueCache, with: result.valueCacheUpdate, at: Int(cachePos))
+            cachePos += 1
+        }
+
+        // Autoregressive generation
+        var lastToken = allTokens.last!
         for _ in 0..<maxDecoderTokens {
-            // Build decoder input
-            let tokenArray = try MLMultiArray(shape: [1, NSNumber(value: tokens.count)], dataType: .int32)
-            for (i, token) in tokens.enumerated() {
-                tokenArray[[0, i] as [NSNumber]] = NSNumber(value: token)
-            }
+            let result = try runDecoderStep(
+                model,
+                inputId: lastToken,
+                cacheLength: cachePos,
+                keyCache: keyCache,
+                valueCache: valueCache,
+                encoderOutput: encoderOutput
+            )
 
-            let decoderInput = try MLDictionaryFeatureProvider(dictionary: [
-                "input_ids": tokenArray,
-                "encoder_output": encoderOutput,
-            ])
+            // Argmax over logits
+            let nextToken = argmax(result.logits)
 
-            let output = try await model.prediction(from: decoderInput)
-
-            // Get logits: [1, seqLen, vocabSize] — take last position
-            guard let logits = output.featureValue(for: "logits")?.multiArrayValue else {
+            // Stop conditions
+            if nextToken == WhisperTokenizer.eot || nextToken == WhisperTokenizer.noSpeech {
                 break
             }
 
-            // Argmax of last token position
-            let vocabSize = logits.shape.last!.intValue
-            let lastPos = tokens.count - 1
-            var maxVal: Float = -Float.infinity
-            var maxIdx: Int32 = 0
-
-            for v in 0..<vocabSize {
-                let val = logits[[0, lastPos, v] as [NSNumber]].floatValue
-                if val > maxVal {
-                    maxVal = val
-                    maxIdx = Int32(v)
-                }
-            }
-
-            // Stop on EOT or special tokens
-            if maxIdx == WhisperTokenizer.eot || maxIdx == WhisperTokenizer.noSpeech {
-                break
-            }
-
-            // Skip timestamp tokens (50364+)
-            if maxIdx > WhisperTokenizer.noTimestamps {
+            // Skip timestamp tokens
+            if nextToken > WhisperTokenizer.noTimestamps {
+                // Still update cache
+                updateCache(&keyCache, with: result.keyCacheUpdate, at: Int(cachePos))
+                updateCache(&valueCache, with: result.valueCacheUpdate, at: Int(cachePos))
+                cachePos += 1
+                lastToken = nextToken
                 continue
             }
 
-            outputTokens.append(maxIdx)
-            tokens.append(maxIdx)
+            outputTokens.append(nextToken)
+            lastToken = nextToken
+
+            // Update cache
+            updateCache(&keyCache, with: result.keyCacheUpdate, at: Int(cachePos))
+            updateCache(&valueCache, with: result.valueCacheUpdate, at: Int(cachePos))
+            cachePos += 1
+
+            if cachePos >= maxCacheLength { break }
         }
 
         return outputTokens
     }
 
-    // MARK: - Errors
+    // MARK: - Single decoder step
+
+    private struct DecoderStepResult {
+        let logits: MLMultiArray
+        let keyCacheUpdate: MLMultiArray
+        let valueCacheUpdate: MLMultiArray
+    }
+
+    private func runDecoderStep(
+        _ model: MLModel,
+        inputId: Int32,
+        cacheLength: Int32,
+        keyCache: MLMultiArray,
+        valueCache: MLMultiArray,
+        encoderOutput: MLMultiArray
+    ) throws -> DecoderStepResult {
+
+        // input_ids: [1]
+        let inputIds = try MLMultiArray(shape: [1], dataType: .int32)
+        inputIds[0] = NSNumber(value: inputId)
+
+        // cache_length: [1]
+        let cacheLenArray = try MLMultiArray(shape: [1], dataType: .int32)
+        cacheLenArray[0] = NSNumber(value: cacheLength)
+
+        // kv_cache_update_mask: [1, 224] — one-hot at cacheLength position
+        let updateMask = try MLMultiArray(shape: [1, maxCacheLength as NSNumber], dataType: .float16)
+        for i in 0..<maxCacheLength {
+            updateMask[i] = NSNumber(value: Float16(i == Int(cacheLength) ? 1 : 0))
+        }
+
+        // decoder_key_padding_mask: [1, 224] — 0 for valid positions, -inf for padding
+        let paddingMask = try MLMultiArray(shape: [1, maxCacheLength as NSNumber], dataType: .float16)
+        for i in 0..<maxCacheLength {
+            paddingMask[i] = NSNumber(value: i <= Int(cacheLength) ? Float16(0) : Float16(-10000))
+        }
+
+        let input = try MLDictionaryFeatureProvider(dictionary: [
+            "input_ids": MLFeatureValue(multiArray: inputIds),
+            "cache_length": MLFeatureValue(multiArray: cacheLenArray),
+            "key_cache": MLFeatureValue(multiArray: keyCache),
+            "value_cache": MLFeatureValue(multiArray: valueCache),
+            "kv_cache_update_mask": MLFeatureValue(multiArray: updateMask),
+            "encoder_output_embeds": MLFeatureValue(multiArray: encoderOutput),
+            "decoder_key_padding_mask": MLFeatureValue(multiArray: paddingMask),
+        ])
+
+        let output = try model.prediction(from: input)
+
+        guard let logits = output.featureValue(for: "logits")?.multiArrayValue,
+              let keyCacheUpdate = output.featureValue(for: "key_cache_updates")?.multiArrayValue,
+              let valueCacheUpdate = output.featureValue(for: "value_cache_updates")?.multiArrayValue else {
+            throw PipelineError.decoderOutputMissing
+        }
+
+        return DecoderStepResult(logits: logits, keyCacheUpdate: keyCacheUpdate, valueCacheUpdate: valueCacheUpdate)
+    }
+
+    // MARK: - Helpers
+
+    /// Copy cache update [1, 3072, 1, 1] into cache [1, 3072, 1, 224] at position.
+    private func updateCache(_ cache: inout MLMultiArray, with update: MLMultiArray, at position: Int) {
+        for d in 0..<kvDim {
+            // cache layout: [1, kvDim, 1, maxCacheLength]
+            let idx = d * maxCacheLength + position
+            cache[idx] = update[d]
+        }
+    }
+
+    /// Argmax over logits [1, 1, vocabSize].
+    private func argmax(_ logits: MLMultiArray) -> Int32 {
+        var maxVal: Float = -Float.infinity
+        var maxIdx: Int32 = 0
+
+        for v in 0..<vocabSize {
+            let val = logits[v].floatValue
+            if val > maxVal {
+                maxVal = val
+                maxIdx = Int32(v)
+            }
+        }
+
+        return maxIdx
+    }
 
     enum PipelineError: Error {
         case encoderOutputMissing
