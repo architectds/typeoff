@@ -3,17 +3,14 @@ import AVFoundation
 
 struct OnboardingView: View {
 
-    @EnvironmentObject var engine: WhisperEngine
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @StateObject private var downloader = ModelDownloader()
     @State private var currentPage = 0
 
     var body: some View {
         TabView(selection: $currentPage) {
             welcomePage.tag(0)
             micPermissionPage.tag(1)
-            modelDownloadPage.tag(2)
-            keyboardSetupPage.tag(3)
+            keyboardSetupPage.tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
@@ -99,100 +96,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Page 2: Model download
-
-    private var modelDownloadPage: some View {
-        VStack(spacing: 28) {
-            Spacer()
-
-            Image(systemName: "arrow.down.circle")
-                .font(.system(size: 56, weight: .light))
-                .foregroundStyle(Theme.primary)
-
-            VStack(spacing: 8) {
-                Text("Download Voice Engine")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(Theme.onSurface)
-
-                Text("TypeOff uses a 74 MB speech model that runs entirely on your device. Download it once, then go offline forever.")
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(Theme.onSurfaceVariant)
-                    .lineSpacing(3)
-                    .padding(.horizontal, 32)
-            }
-
-            if downloader.isDownloading {
-                VStack(spacing: 12) {
-                    ProgressView(value: downloader.progress)
-                        .tint(Theme.primary)
-
-                    Text(downloader.statusText)
-                        .font(.caption)
-                        .foregroundStyle(Theme.onSurfaceVariant)
-
-                    Text("\(Int(downloader.progress * 100))%")
-                        .font(.caption.monospacedDigit().weight(.medium))
-                        .foregroundStyle(Theme.onSurface)
-                }
-                .sectionContainer()
-            } else if let error = downloader.error {
-                VStack(spacing: 8) {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(Theme.error)
-                        .multilineTextAlignment(.center)
-
-                    Button("Retry") {
-                        startDownload()
-                    }
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Theme.primary)
-                }
-                .sectionContainer()
-            } else if engine.isModelLoaded {
-                VStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Theme.success)
-
-                    Text("Voice engine ready")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(Theme.success)
-                }
-            }
-
-            Spacer()
-
-            if engine.isModelLoaded {
-                Button("Continue") {
-                    withAnimation { currentPage = 3 }
-                }
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Theme.primaryGradient)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.pillRadius, style: .continuous))
-                .sectionContainer()
-            } else if !downloader.isDownloading {
-                Button("Download (74 MB)") {
-                    startDownload()
-                }
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Theme.primaryGradient)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.pillRadius, style: .continuous))
-                .sectionContainer()
-            }
-
-            Spacer().frame(height: 50)
-        }
-    }
-
-    // MARK: - Page 3: Keyboard setup
+    // MARK: - Page 2: Keyboard setup
 
     private var keyboardSetupPage: some View {
         ScrollView {
@@ -273,17 +177,8 @@ struct OnboardingView: View {
         }
     }
 
-    private func startDownload() {
-        Task {
-            let success = await downloader.download(precision: .standard)
-            if success {
-                await engine.loadModel(precision: .standard)
-            }
-        }
-    }
 }
 
 #Preview {
     OnboardingView()
-        .environmentObject(WhisperEngine())
 }

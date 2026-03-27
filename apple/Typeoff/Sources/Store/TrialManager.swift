@@ -9,13 +9,12 @@ final class TrialManager: ObservableObject {
     @Published var isPurchased = false
     @Published var trialDaysRemaining = 7
 
-    private static let suiteName = "group.com.typeoff.shared"
     private static let firstLaunchKey = "firstLaunchDate"
     private static let purchasedKey = "isPurchased"
     private static let trialDays = 7
 
     private static var sharedDefaults: UserDefaults? {
-        UserDefaults(suiteName: suiteName)
+        UserDefaults.standard
     }
 
     init() {

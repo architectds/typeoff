@@ -217,8 +217,3 @@ struct ProfileView: View {
     }
 }
 
-#Preview {
-    ProfileView()
-        .environmentObject(TrialManager())
-        .environmentObject(StoreManager())
-}

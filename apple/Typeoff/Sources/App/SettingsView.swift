@@ -6,7 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject var storeManager: StoreManager
     @EnvironmentObject var engine: WhisperEngine
 
-    @AppStorage("silenceDuration", store: UserDefaults(suiteName: "group.com.typeoff.shared"))
+    @AppStorage("silenceDuration")
     private var silenceDuration: Double = 5.0
 
     var body: some View {
@@ -24,9 +24,6 @@ struct SettingsView: View {
 
                 // Keyboard setup
                 keyboardSection
-
-                // Precision
-                precisionSection
 
                 // Transcription
                 transcriptionSection
@@ -77,73 +74,6 @@ struct SettingsView: View {
         .sectionContainer()
     }
 
-    // MARK: - Precision
-
-    private var precisionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Theme.headline("PRECISION")
-                .padding(.leading, 4)
-
-            VStack(spacing: 2) {
-                ForEach(Precision.allCases) { precision in
-                    precisionRow(precision)
-                }
-            }
-            .background(Theme.surfaceContainerLowest)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-
-            if engine.isDownloading {
-                HStack(spacing: 8) {
-                    ProgressView()
-                    Text(engine.loadingProgress)
-                        .font(.caption)
-                        .foregroundStyle(Theme.onSurfaceVariant)
-                }
-                .padding(.leading, 4)
-            }
-
-            Text("Higher precision is more accurate but uses more storage and loads slower.")
-                .font(.caption)
-                .foregroundStyle(Theme.onSurfaceVariant)
-                .padding(.leading, 4)
-        }
-        .sectionContainer()
-    }
-
-    private func precisionRow(_ precision: Precision) -> some View {
-        Button {
-            guard !engine.isDownloading else { return }
-            Task { await engine.loadModel(precision: precision) }
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(precision.label)
-                        .font(.body)
-                        .foregroundStyle(Theme.onSurface)
-                    Text("\(precision.sizeLabel) · \(precision.loadTimeHint)")
-                        .font(.caption)
-                        .foregroundStyle(Theme.onSurfaceVariant)
-                }
-
-                Spacer()
-
-                if engine.activePrecision == precision && engine.isModelLoaded {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Theme.success)
-                } else if engine.downloadedModels.contains(precision) {
-                    Circle()
-                        .strokeBorder(Theme.onSurfaceVariant.opacity(0.3), lineWidth: 1.5)
-                        .frame(width: 22, height: 22)
-                } else {
-                    Image(systemName: "arrow.down.circle")
-                        .foregroundStyle(Theme.primary)
-                }
-            }
-            .padding(16)
-        }
-        .disabled(engine.isDownloading)
-    }
-
     // MARK: - Transcription
 
     private var transcriptionSection: some View {
@@ -175,9 +105,3 @@ struct SettingsView: View {
     }
 }
 
-#Preview {
-    SettingsView()
-        .environmentObject(WhisperEngine())
-        .environmentObject(TrialManager())
-        .environmentObject(StoreManager())
-}

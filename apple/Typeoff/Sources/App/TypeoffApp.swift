@@ -42,6 +42,7 @@ struct ContentView: View {
 
 struct MainTabView: View {
 
+    @EnvironmentObject var engine: WhisperEngine
     @EnvironmentObject var trialManager: TrialManager
     @EnvironmentObject var storeManager: StoreManager
     @State private var selectedTab = 1  // Start on Notes (center)
@@ -71,8 +72,8 @@ struct MainTabView: View {
         }
         .tint(Theme.primary)
         .task {
-            // Load trial + store only when user reaches the main app
             trialManager.refresh()
+            await engine.loadModel()
             Task { await storeManager.loadProducts() }
         }
     }
