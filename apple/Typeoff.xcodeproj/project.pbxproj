@@ -56,9 +56,9 @@
 		A8A1DAAFD8ACAC7D28703814 /* TypeoffApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeoffApp.swift; sourceTree = "<group>"; };
 		C401BF13A1A047FDE403647C /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		C4B3D4B1F3C9C9AC3D57AD68 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		DAFFCDFE7635CB0EB450A2D7 /* TypeoffKeyboard.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TypeoffKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		E0A2F2B1A6F6A59C0AFC37B5 /* Typeoff.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Typeoff.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1EA7A7D28836735F447E458 /* TypeoffTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TypeoffTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAFFCDFE7635CB0EB450A2D7 /* TypeoffKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TypeoffKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E0A2F2B1A6F6A59C0AFC37B5 /* TypeOff.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeOff.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1EA7A7D28836735F447E458 /* TypeoffTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TypeoffTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB2E0D702924031E4D67F441 /* WhisperKitModels */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WhisperKitModels; path = Typeoff/Resources/WhisperKitModels; sourceTree = SOURCE_ROOT; };
 		F8AC1D5F5AFE72CFB24979E3 /* WhisperEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperEngine.swift; sourceTree = "<group>"; };
 		F8F2671B4261324ADD9C0E59 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -137,7 +137,7 @@
 		9E752C2C36F76C59F502F408 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E0A2F2B1A6F6A59C0AFC37B5 /* Typeoff.app */,
+				E0A2F2B1A6F6A59C0AFC37B5 /* TypeOff.app */,
 				DAFFCDFE7635CB0EB450A2D7 /* TypeoffKeyboard.appex */,
 				E1EA7A7D28836735F447E458 /* TypeoffTests.xctest */,
 			);
@@ -195,7 +195,7 @@
 				68B8C3EBD351B53063513649 /* WhisperKit */,
 			);
 			productName = Typeoff;
-			productReference = E0A2F2B1A6F6A59C0AFC37B5 /* Typeoff.app */;
+			productReference = E0A2F2B1A6F6A59C0AFC37B5 /* TypeOff.app */;
 			productType = "com.apple.product-type.application";
 		};
 		DA7A8C236C1EE542C49CD6F9 /* TypeoffKeyboard */ = {
@@ -225,15 +225,12 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					1A11FB3B38C9DE9EE921FBA7 = {
-						DevelopmentTeam = 2TWV639R43;
 						ProvisioningStyle = Automatic;
 					};
 					555DC74C44A20B97A84B9816 = {
-						DevelopmentTeam = 2TWV639R43;
 						ProvisioningStyle = Automatic;
 					};
 					DA7A8C236C1EE542C49CD6F9 = {
-						DevelopmentTeam = 2TWV639R43;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -393,6 +390,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Typeoff/TypeoffKeyboard.entitlements;
+				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Sources/Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -410,6 +408,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -431,6 +430,7 @@
 				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -449,6 +449,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -528,6 +529,7 @@
 				CODE_SIGN_ENTITLEMENTS = Typeoff/Typeoff.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -546,6 +548,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Typeoff/TypeoffKeyboard.entitlements;
+				DEVELOPMENT_TEAM = D9UU9594J2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Typeoff/Sources/Keyboard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
