@@ -47,7 +47,7 @@ struct KeyboardView: View {
                             .fill(isRecording ? Color.red : Color.blue)
                             .frame(width: 52, height: 52)
 
-                        Image(systemName: isRecording ? "stop.fill" : "mic.fill")
+                        Image(systemName: isRecording ? "mic.slash.fill" : "mic.fill")
                             .font(.title2)
                             .foregroundStyle(.white)
                     }

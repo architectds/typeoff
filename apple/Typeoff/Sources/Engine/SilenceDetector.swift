@@ -5,7 +5,7 @@ import Accelerate
 struct SilenceDetector {
 
     let silenceThreshold: Float = 0.005
-    let silenceDuration: TimeInterval = 8.0
+    let silenceDuration: TimeInterval = 5.0
     let sampleRate: Int = 16000
 
     /// Check if the audio tail is all silence (user stopped speaking).

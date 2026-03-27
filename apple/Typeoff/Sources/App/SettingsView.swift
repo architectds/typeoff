@@ -7,7 +7,7 @@ struct SettingsView: View {
     @EnvironmentObject var engine: WhisperEngine
 
     @AppStorage("silenceDuration", store: UserDefaults(suiteName: "group.com.typeoff.shared"))
-    private var silenceDuration: Double = 8.0
+    private var silenceDuration: Double = 5.0
 
     var body: some View {
         NavigationStack {

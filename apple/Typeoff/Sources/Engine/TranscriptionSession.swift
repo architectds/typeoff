@@ -86,8 +86,8 @@ final class TranscriptionSession: ObservableObject {
             let audio = recorder.getAudio()
             let duration = Double(audio.count) / Double(sampleRate)
 
-            // Auto-stop on 8s silence
-            if duration > 8.0 && silenceDetector.hasSpeech(audio: audio) {
+            // Auto-stop on silence
+            if duration > 5.0 && silenceDetector.hasSpeech(audio: audio) {
                 if silenceDetector.detectEndOfSpeech(audio: audio) {
                     print("[Typeoff] Silence detected — auto-stopping")
                     stop()
