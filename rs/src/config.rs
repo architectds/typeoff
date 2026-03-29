@@ -28,7 +28,7 @@ pub struct Config {
 
 fn default_model() -> String { "small".into() }
 fn default_true() -> bool { true }
-fn default_silence_duration() -> f32 { 2.0 }
+fn default_silence_duration() -> f32 { 3.0 }
 fn default_max_duration() -> f32 { 60.0 }
 fn default_sample_rate() -> u32 { 16000 }
 fn default_correction_mode() -> String { "off".into() }

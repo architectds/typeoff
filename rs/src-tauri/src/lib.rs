@@ -152,20 +152,61 @@ fn get_config(state: tauri::State<TauriState>) -> Config {
 
 #[tauri::command]
 fn save_config(state: tauri::State<TauriState>, new_config: serde_json::Value) -> serde_json::Value {
-    let mut config = state.config.lock().unwrap();
-    if let Ok(merged) = serde_json::to_value(&*config) {
-        if let serde_json::Value::Object(mut map) = merged {
-            if let serde_json::Value::Object(new_map) = new_config {
-                for (k, v) in new_map {
-                    map.insert(k, v);
+    let old_model;
+    let new_model;
+
+    {
+        let mut config = state.config.lock().unwrap();
+        old_model = config.model.clone();
+
+        if let Ok(merged) = serde_json::to_value(&*config) {
+            if let serde_json::Value::Object(mut map) = merged {
+                if let serde_json::Value::Object(new_map) = new_config {
+                    for (k, v) in new_map {
+                        map.insert(k, v);
+                    }
+                }
+                if let Ok(updated) = serde_json::from_value::<Config>(serde_json::Value::Object(map)) {
+                    updated.save();
+                    *config = updated;
                 }
             }
-            if let Ok(updated) = serde_json::from_value::<Config>(serde_json::Value::Object(map)) {
-                updated.save();
-                *config = updated;
+        }
+
+        new_model = config.model.clone();
+    }
+
+    // If model changed, check if new model exists and reload
+    if old_model != new_model {
+        let config = state.config.lock().unwrap().clone();
+        let model_path = config.get_model_path();
+
+        if std::path::Path::new(&model_path).exists() {
+            // Model exists — reload in background
+            let app_state = Arc::clone(&state.state);
+            let transcriber_ref = Arc::clone(&state.transcriber);
+
+            {
+                let mut s = app_state.lock().unwrap();
+                s.status = "loading".into();
+                s.message = format!("Loading {}...", new_model);
             }
+
+            thread::spawn(move || {
+                let t = Transcriber::new(&config);
+                *transcriber_ref.lock().unwrap() = Some(t);
+                let mut s = app_state.lock().unwrap();
+                s.status = "ready".into();
+                s.message = format!("Ready — whisper-{}", config.model);
+            });
+
+            return serde_json::json!({"ok": true, "message": "Loading new model..."});
+        } else {
+            // Model doesn't exist — tell UI to show download prompt
+            return serde_json::json!({"ok": true, "message": "Model not found", "needsDownload": true});
         }
     }
+
     serde_json::json!({"ok": true, "message": "Settings saved"})
 }
 

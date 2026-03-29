@@ -599,9 +599,17 @@
     };
 
     config = {...config, ...newConfig};
-    await invoke('save_config', { newConfig });
+    const result = await invoke('save_config', { newConfig });
     updateHotkeyHint();
-    showToast('Settings saved');
+
+    if (result && result.needsDownload) {
+      showToast('Model not found — switch to main page to download');
+      // Switch to main page and show download prompt
+      if (settingsOpen) toggleSettings();
+      await checkModelStatus();
+    } else {
+      showToast(result?.message || 'Settings saved');
+    }
   }
 
   function showToast(msg) {

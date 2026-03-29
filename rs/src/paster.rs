@@ -43,7 +43,11 @@ pub fn paste_text(text: &str) {
 
 #[cfg(target_os = "macos")]
 fn paste_macos() {
-    // Use osascript for reliable Cmd+V — works from any thread, no Accessibility needed
+    // Small delay to let the target app regain focus after any window changes
+    thread::sleep(Duration::from_millis(100));
+
+    // Use osascript to send Cmd+V to the frontmost app
+    // This requires Accessibility permission for System Events
     let _ = std::process::Command::new("osascript")
         .arg("-e")
         .arg("tell application \"System Events\" to keystroke \"v\" using command down")
