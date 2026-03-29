@@ -148,12 +148,10 @@ struct PermissionStatus {
 
 #[cfg(target_os = "macos")]
 fn check_accessibility() -> bool {
-    // AXIsProcessTrusted() returns true if Accessibility permission is granted
-    use std::process::Command;
-    // Use osascript to test if System Events is accessible
-    let output = Command::new("osascript")
+    // Test if osascript can actually send keystrokes (not just query)
+    let output = std::process::Command::new("osascript")
         .arg("-e")
-        .arg("tell application \"System Events\" to return name of first process")
+        .arg("tell application \"System Events\" to keystroke \"\"")
         .output();
     match output {
         Ok(o) => o.status.success(),
