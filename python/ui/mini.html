@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Typeoff Recording</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: #1a1b2e;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+  }
+
+  .bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  /* Dot */
+  .rec-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #f38ba8;
+    animation: pulse 1.2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* Waveform */
+  .waveform {
+    display: flex; align-items: center; gap: 2px; height: 24px;
+  }
+  .waveform .b {
+    width: 3px; border-radius: 2px; background: #f38ba8;
+    animation: wave 0.8s ease-in-out infinite;
+  }
+  .waveform .b:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .waveform .b:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+  .waveform .b:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+  .waveform .b:nth-child(4) { height: 20px; animation-delay: 0.15s; }
+  .waveform .b:nth-child(5) { height: 12px; animation-delay: 0.3s; }
+  .waveform .b:nth-child(6) { height: 18px; animation-delay: 0.05s; }
+  .waveform .b:nth-child(7) { height: 8px; animation-delay: 0.25s; }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  /* Done waveform */
+  .waveform.done .b {
+    background: #a6e3a1;
+    animation: none;
+    height: 4px;
+  }
+
+  .waveform.transcribing .b {
+    background: #fab387;
+  }
+
+  /* Label */
+  .label {
+    font-size: 12px; font-weight: 600; color: #a6adc8;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Timer */
+  .timer {
+    font-size: 13px; font-weight: 600; color: #f38ba8;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .timer.done { color: #a6e3a1; }
+  .timer.transcribing { color: #fab387; }
+
+  /* Hint */
+  .hint {
+    font-size: 10px; color: #585b70;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="rec-dot" id="dot"></div>
+  <div class="waveform" id="waveform">
+    <div class="b"></div><div class="b"></div><div class="b"></div>
+    <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+  </div>
+  <div class="label" id="label">Recording...</div>
+  <div class="timer" id="timer">0s</div>
+  <div class="hint">Shift Shift</div>
+</div>
+<script>
+  setInterval(async () => {
+    if (!window.pywebview) return;
+    try {
+      const state = await pywebview.api.get_state();
+      if (!state || !state.status) return;
+
+      const dot = document.getElementById('dot');
+      const wf = document.getElementById('waveform');
+      const label = document.getElementById('label');
+      const timer = document.getElementById('timer');
+
+      if (state.status === 'recording') {
+        dot.style.background = '#f38ba8';
+        wf.className = 'waveform';
+        label.textContent = state.text ? state.text.slice(-60) : 'Recording...';
+        const secs = Math.floor(state.elapsed);
+        const mins = Math.floor(secs / 60);
+        const s = secs % 60;
+        timer.textContent = mins > 0 ? `${mins}:${String(s).padStart(2, '0')}` : `${s}s`;
+        timer.className = 'timer';
+      } else if (state.status === 'transcribing') {
+        dot.style.background = '#fab387';
+        wf.className = 'waveform transcribing';
+        label.textContent = 'Transcribing...';
+        timer.className = 'timer transcribing';
+      } else if (state.status === 'done') {
+        dot.style.background = '#a6e3a1';
+        wf.className = 'waveform done';
+        label.textContent = state.text ? state.text.slice(-60) : 'Done!';
+        timer.className = 'timer done';
+        timer.textContent = '';
+      }
+    } catch(e) {}
+  }, 200);
+</script>
+</body>
+</html>

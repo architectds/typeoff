@@ -1,0 +1,52 @@
+[workspace]
+members = [".", "src-tauri"]
+
+[package]
+name = "typeoff"
+version = "0.2.0"
+edition = "2021"
+description = "Offline speech-to-text. Press hotkey, speak, text appears."
+
+[lib]
+name = "typeoff"
+path = "src/lib.rs"
+
+[[bin]]
+name = "typeoff"
+path = "src/main.rs"
+
+[dependencies]
+# Whisper inference (whisper.cpp bindings)
+whisper-rs = { version = "0.16", features = ["metal"] }
+
+# Audio capture
+cpal = "0.15"
+
+# Audio bandpass filter (50-3400Hz human voice)
+biquad = "0.4"
+
+# Global hotkey detection (double-shift)
+# fufesou fork fixes macOS TSM crash when used with Tauri
+rdev = { git = "https://github.com/fufesou/rdev" }
+
+# Clipboard + keyboard simulation for paste
+arboard = "3"
+enigo = "0.2"
+
+# Serialization (settings)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Filler removal
+regex = "1"
+
+# LLM correction (Qwen via llama.cpp)
+llama-cpp-2 = "0.1"
+
+# Misc
+dirs = "6"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
