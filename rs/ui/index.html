@@ -409,6 +409,16 @@
         <div class="settings-section-title">System</div>
         <div class="setting-row">
           <div>
+            <div class="setting-label">GPU acceleration</div>
+            <div class="setting-desc">Enable if you have NVIDIA GPU (requires CUDA build)</div>
+          </div>
+          <label class="setting-toggle">
+            <input type="checkbox" id="setUseGpu">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
             <div class="setting-label">Start at login</div>
             <div class="setting-desc">Launch Typeoff when you log in</div>
           </div>
@@ -580,6 +590,7 @@
     // Toggles
     document.getElementById('setAutoPaste').checked = config.auto_paste !== false;
     document.getElementById('setAutoStop').checked = config.auto_stop_silence !== false;
+    document.getElementById('setUseGpu').checked = config.use_gpu === true;
     document.getElementById('setVerbose').checked = config.verbose === true;
     document.getElementById('setCorrectionMode').value = config.correction_mode || 'off';
 
@@ -630,6 +641,7 @@
       model: document.getElementById('setModel').value,
       language: document.getElementById('setLanguage').value,
       hotkey: document.getElementById('setHotkey').value,
+      use_gpu: document.getElementById('setUseGpu').checked,
       auto_paste: document.getElementById('setAutoPaste').checked,
       auto_stop_silence: document.getElementById('setAutoStop').checked,
       silence_duration: parseFloat(document.getElementById('setSilenceDur').value),

@@ -20,6 +20,8 @@ pub struct Config {
     pub sample_rate: u32,
     #[serde(default)]
     pub model_path: Option<String>,
+    #[serde(default)]
+    pub use_gpu: bool,
     #[serde(default = "default_correction_mode")]
     pub correction_mode: String,
     #[serde(default)]
@@ -44,6 +46,7 @@ impl Default for Config {
             max_duration: default_max_duration(),
             sample_rate: default_sample_rate(),
             model_path: None,
+            use_gpu: false,
             correction_mode: default_correction_mode(),
             correction_model_path: None,
         }

@@ -26,36 +26,31 @@ impl Transcriber {
         let model_path = config.get_model_path();
         let mut ctx_params = WhisperContextParameters::default();
 
-        // GPU detection per platform
-        #[cfg(target_os = "macos")]
-        {
-            // Metal GPU only works on Apple Silicon (M-series).
-            // AMD/Intel discrete GPUs produce garbled output.
-            let is_apple_silicon = std::process::Command::new("sysctl")
-                .args(["-n", "machdep.cpu.brand_string"])
-                .output()
-                .map(|o| String::from_utf8_lossy(&o.stdout).contains("Apple"))
-                .unwrap_or(false);
+        // GPU control: respect config.use_gpu setting
+        if config.use_gpu {
+            #[cfg(target_os = "macos")]
+            {
+                let is_apple_silicon = std::process::Command::new("sysctl")
+                    .args(["-n", "machdep.cpu.brand_string"])
+                    .output()
+                    .map(|o| String::from_utf8_lossy(&o.stdout).contains("Apple"))
+                    .unwrap_or(false);
 
-            if is_apple_silicon {
-                println!("[typeoff] Apple Silicon detected, using Metal GPU.");
-            } else {
-                println!("[typeoff] Non-Apple-Silicon Mac, using CPU.");
-                ctx_params.use_gpu(false);
+                if is_apple_silicon {
+                    println!("[typeoff] GPU ON — Apple Silicon Metal.");
+                } else {
+                    println!("[typeoff] GPU requested but AMD/Intel Mac — using CPU.");
+                    ctx_params.use_gpu(false);
+                }
             }
-        }
 
-        #[cfg(target_os = "windows")]
-        {
-            // CUDA auto-detection: whisper.cpp will try CUDA if available,
-            // fall back to CPU if no NVIDIA GPU found.
-            // GPU is enabled by default — whisper.cpp handles the fallback.
-            println!("[typeoff] Windows: GPU (CUDA) enabled if available, CPU fallback.");
-        }
-
-        #[cfg(target_os = "linux")]
-        {
-            println!("[typeoff] Linux: GPU (CUDA) enabled if available, CPU fallback.");
+            #[cfg(not(target_os = "macos"))]
+            {
+                println!("[typeoff] GPU ON — CUDA if available, CPU fallback.");
+            }
+        } else {
+            println!("[typeoff] GPU OFF — using CPU.");
+            ctx_params.use_gpu(false);
         }
 
         let ctx = WhisperContext::new_with_params(&model_path, ctx_params)
