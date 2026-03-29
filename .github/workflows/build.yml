@@ -25,6 +25,8 @@ jobs:
         working-directory: rs
         env:
           MACOSX_DEPLOYMENT_TARGET: "11.0"
+          CFLAGS: "-mmacosx-version-min=11.0"
+          CXXFLAGS: "-mmacosx-version-min=11.0"
         run: cargo tauri build
 
       - name: Upload artifact
