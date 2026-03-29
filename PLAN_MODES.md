@@ -2,253 +2,230 @@
 
 ## Vision
 
-Once Whisper → LLM exists in the pipeline, the distance from "correction" to "translation/rewriting/email" is just a prompt swap + temperature change. No architecture change needed. Typeoff becomes not just a voice input method, but a voice-driven agent interface that can switch between modes on command.
+Typeoff is not just a voice input method — it's a **voice-driven AI writing assistant**. Two core modes:
 
-## Mode Spectrum
+- **Fast Mode** (current): real-time transcription → sentence-by-sentence paste. For chat, quick input.
+- **Think Mode** (new): accumulate full speech → LLM rewrites everything → paste clean output. For emails, documents, structured content.
+
+Fast Mode competes with 豆包/微信语音输入. Think Mode competes with Typeless ($19/month cloud service). Both run fully offline.
+
+## Product Positioning
+
+| | 豆包/微信语音 | Typeoff Fast | Typeless | Typeoff Think |
+|---|---|---|---|---|
+| Transcription | Cloud | Local (Whisper) | Cloud | Local (Whisper) |
+| Output | Literal | Literal + filler removal | Restructured | Restructured |
+| Latency | ~1s | ~3-6s streaming | ~5-10s batch | ~5-10s batch |
+| Intent understanding | No | No | Yes | Yes (LLM) |
+| Handles "前面说错了" | No | No | Yes | Yes (session memory) |
+| Offline | No | Yes | No (crashes) | Yes |
+| Price | Free | Free | $19/month | Free |
+
+## Two-Mode Architecture
+
+### Fast Mode (Current)
 
 ```
-Low creativity                                              High creativity
-    ↓                                                            ↓
-  直接输入    →    纠错    →    润色    →    翻译    →    写邮件    →    自由写作
-  (bypass)      (correct)    (polish)   (translate)   (email)      (freewrite)
-  temp=0        temp=0       temp=0.3   temp=0.3      temp=0.5     temp=0.7
+Mic → Filter → VAD → Whisper (every 3s) → Agreement → Filler Removal → [Optional LLM Correction] → Paste
 ```
 
-All modes share the same pipeline. The only difference is the system prompt and temperature sent to the LLM.
+- Sentences paste as you speak
+- Low latency, real-time feel
+- LLM correction is optional (0.5B, homophones only)
+- Best for: chat, messaging, quick text entry
 
-## Triggering Modes
-
-Two trigger mechanisms, both active simultaneously:
-
-### 1. Safeword Trigger (Voice)
-
-User says **"Toff, [command]"** at any point during dictation. The safeword "Toff" is stripped from transcription and treated as a mode-switch command.
+### Think Mode (New)
 
 ```
-User speaks: "Toff, 翻译模式"
-Whisper outputs: "Toff, 翻译模式"
-Detection: starts_with("Toff") → extract "翻译模式" → switch mode
-Action: switch LLM prompt to translate, do NOT paste "Toff, 翻译模式"
-
-User speaks: "The weather is nice today"
-Whisper outputs: "The weather is nice today"
-Detection: no "Toff" prefix → normal pipeline
-Action: LLM translates → paste "今天天气很好"
+Mic → Filter → VAD → Whisper (full session) → Full Transcript → LLM 7B (rewrite) → Paste
 ```
 
-**Safeword matching rules:**
-- Match: "Toff," / "toff," / "Toff " / "TOFF," (case-insensitive, with comma or space after)
-- The word "Toff" appearing mid-sentence is NOT a trigger: "This toffee is good" → normal text
-- Only triggers when "Toff" is the first word of a new transcription segment
+- Nothing pastes during recording
+- When you stop, LLM processes the entire transcript
+- Removes filler, fixes errors, restructures, understands corrections
+- Produces clean, structured output
+- Best for: emails, documents, notes, long-form content
 
-**Command matching:**
-After stripping the safeword, fuzzy-match against known commands:
+**Key difference:** Fast Mode processes sentence-by-sentence (streaming). Think Mode processes the whole session at once (batch). Think Mode needs a larger LLM (3B-7B) but only runs once at the end.
 
-| Voice Command | Mode | Language Variants |
-|---------------|------|-------------------|
-| "直接输入" / "direct" / "bypass" | Bypass (no LLM) | |
-| "纠错" / "纠错模式" / "correct" / "correction" | Correction | |
-| "润色" / "polish" / "rewrite" | Polish | |
-| "翻译" / "翻译成中文" / "translate" / "translate to English" | Translate | detect target from command |
-| "写邮件" / "email" / "formal email" | Email | |
-| "总结" / "summarize" | Summarize | |
-| "恢复" / "reset" / "normal" | Back to default mode | |
+## Think Mode: How It Works
 
-### 2. UI Mode Selector (Physical)
+### Session Flow
 
-A dropdown or segmented control in the Tauri UI and settings page. User sets a **default mode** that persists across sessions. The safeword trigger overrides this temporarily until "Toff, 恢复" resets to default.
+```
+1. User starts recording (double-shift)
+2. User speaks freely for 30s - 5min
+   - Can ramble, repeat, correct themselves
+   - "其实前面说的不对，应该是..."
+   - "嗯，那个，就是说..."
+3. User stops recording (double-shift or silence)
+4. Whisper transcribes full audio → raw transcript
+5. LLM 7B processes raw transcript with system prompt:
+   - Remove all filler words
+   - Understand corrections ("前面说错了" → apply the correction)
+   - Restructure into clean paragraphs
+   - Maintain original meaning and tone
+   - Output in same language as input
+6. Clean result pasted into active app
+```
+
+### System Prompt (Think Mode)
+
+```
+你是一个语音转文字助手。用户通过语音说了以下内容。请将其整理为清晰、结构化的文字：
+
+规则：
+1. 去除所有口语填充词（嗯、啊、那个、就是、然后）
+2. 如果用户在说话中纠正了前面的内容（如"前面说错了"），应用纠正
+3. 去除重复和犹豫
+4. 保持原文的意思和风格，不要添加用户没说的内容
+5. 如果用户说的是列表或要点，输出为结构化列表
+6. 保持原文语言，不要翻译
+7. 只输出整理后的文字，不要解释
+
+原始转录：
+{raw_transcript}
+```
+
+### Model Requirements
+
+| Mode | Model | Size | Latency (Apple Silicon) |
+|------|-------|------|------------------------|
+| Fast (correction) | Qwen 0.5B Q8 | ~530MB | ~0.3s/sentence |
+| Think (rewrite) | Qwen 7B Q4 | ~4GB | ~3-5s for full rewrite |
+| Think (lighter) | Qwen 3B Q4 | ~2GB | ~2-3s for full rewrite |
+
+For Think Mode, the LLM runs once after the full recording, not per-sentence. So a 7B model is practical even on CPU (10-20s).
+
+## Mode Switching
+
+### Safeword Trigger (Voice)
+
+User says **"Toff, [command]"** to switch modes:
+
+| Voice Command | Mode | Description |
+|---------------|------|-------------|
+| "Toff, 快速模式" / "Toff, fast" | Fast Mode | Real-time streaming paste |
+| "Toff, 整理模式" / "Toff, think" | Think Mode | Full session → rewrite → paste |
+| "Toff, 翻译成英文" / "Toff, translate" | Translate Mode | Think mode + translate |
+| "Toff, 写邮件" / "Toff, email" | Email Mode | Think mode + formal email format |
+| "Toff, 总结" / "Toff, summarize" | Summarize Mode | Think mode + bullet point summary |
+| "Toff, 恢复" / "Toff, reset" | Back to default | Reset to configured default mode |
+
+### UI Mode Selector
+
+Dropdown in settings or header bar. Persists across sessions.
 
 ```
 ┌──────────────────────────────┐
-│ Mode: [纠错 ▾]               │  ← dropdown in header or settings
+│ Mode: [Fast ▾]               │
 ├──────────────────────────────┤
-│ ● Bypass (直接输入)          │
-│ ● Correction (纠错) ✓       │  ← default
-│ ● Polish (润色)              │
+│ ● Fast (直接输入)        ✓   │
+│ ● Think (整理模式)           │
 │ ● Translate (翻译)           │
 │ ● Email (写邮件)             │
+│ ● Summarize (总结)           │
 │ ● Custom...                  │
 └──────────────────────────────┘
 ```
 
-Settings config:
-```json
-{
-  "default_mode": "correct",
-  "modes": {
-    "correct": {
-      "name": "纠错",
-      "system_prompt": "只纠正同音字错误...",
-      "temperature": 0.0
-    },
-    "translate_zh": {
-      "name": "翻译成中文",
-      "system_prompt": "翻译以下文本为中文...",
-      "temperature": 0.3
-    }
-  }
-}
-```
+## Implementation Plan
 
-## Architecture Changes
+### Phase 1: Think Mode MVP
+1. Add "mode" field to config (fast/think)
+2. In Think Mode, skip streaming paste — accumulate full transcript
+3. After recording stops, send full transcript to LLM with rewrite prompt
+4. Paste the rewritten result
+5. UI: mode selector dropdown
+6. Model: Qwen 3B Q4 (~2GB) as default Think Mode model
 
-### What stays the same
-- Whisper pipeline (mic → filter → VAD → transcribe → streaming agreement)
-- Filler removal
-- Paste mechanism
-- Tauri UI shell
+### Phase 2: Better Think Mode
+7. Session memory — accumulate across multiple recordings
+8. Intent detection — understand "前面说错了" style corrections
+9. Structured output — detect when user is listing items, output as bullet points
+10. Larger model option — Qwen 7B Q4 for best quality
 
-### What changes
+### Phase 3: Mode Ecosystem
+11. Safeword voice trigger ("Toff, think")
+12. Custom mode editor — user writes own system prompts
+13. Mode-specific UI — show "thinking..." animation in Think Mode
+14. API mode — send to cloud LLM (GPT-4, Claude) for users who want best quality
 
-```
-Current:
-  Whisper → filler removal → LLM(correction prompt) → paste
+### Phase 4: Advanced
+15. Context carry-over — previous session informs current rewrite
+16. Multi-turn — keep talking after first rewrite, LLM appends
+17. Tool calls — "Toff, search weather" triggers actions beyond text
+18. Voice agent — continuous conversation with the LLM
 
-New:
-  Whisper → safeword detect ──→ [command] → switch mode (don't paste)
-                              └→ [text] → filler removal → LLM(active mode prompt, temp) → paste
-```
+## Competitive Analysis
 
-### New modules
+### vs Typeless ($19/month)
+- **Advantage**: Fully offline, no subscription, no server crashes
+- **Advantage**: Privacy — nothing leaves the device
+- **Advantage**: Fast Mode for quick input (Typeless only does batch)
+- **Disadvantage**: Smaller model = lower quality rewrite (until 7B)
+- **Disadvantage**: No cloud fallback for complex tasks
 
-**1. `modes.rs` — Mode registry**
-```rust
-struct Mode {
-    id: String,
-    name: String,
-    system_prompt: String,
-    temperature: f32,
-}
+### vs 豆包/微信语音输入 (Free)
+- **Advantage**: Think Mode for structured output
+- **Advantage**: Offline, private
+- **Advantage**: Filler removal, restructuring
+- **Disadvantage**: Slower (local model vs cloud)
+- **Disadvantage**: Requires model download
 
-struct ModeManager {
-    modes: HashMap<String, Mode>,
-    active_mode: String,
-    default_mode: String,
-}
-```
-
-Built-in modes hardcoded. Custom modes from config. Active mode switchable at runtime.
-
-**2. `command.rs` — Safeword detection + command routing**
-```rust
-const SAFEWORD: &str = "toff";
-
-enum CommandResult {
-    Command(String),     // "Toff, 翻译模式" → Command("translate_zh")
-    Text(String),        // "Hello world" → Text("Hello world")
-}
-
-fn detect_command(text: &str) -> CommandResult;
-```
-
-Simple prefix match. No ML needed — just string matching after Whisper output.
-
-**3. Changes to `corrector.rs` → rename to `llm.rs`**
-
-The corrector becomes a general-purpose LLM step that takes a mode config:
-```rust
-fn process(&mut self, text: &str, mode: &Mode) -> String {
-    // Build prompt from mode.system_prompt + text
-    // Set temperature from mode.temperature
-    // Run inference
-    // Safety guard
-}
-```
-
-### Pipeline flow in session loop
-
-```rust
-// In rolling_transcribe callback:
-if let Some(sentence) = new_sentence {
-    let cleaned = fillers::remove_fillers(&sentence);
-
-    // Check for safeword command
-    match command::detect_command(&cleaned) {
-        CommandResult::Command(mode_id) => {
-            mode_manager.switch_to(&mode_id);
-            // Update UI to show new mode
-            // Do NOT paste
-        }
-        CommandResult::Text(text) => {
-            let processed = if mode_manager.active().id == "bypass" {
-                text
-            } else {
-                llm.process(&text, mode_manager.active())
-            };
-            paste_text(&processed);
-        }
-    }
-}
-```
-
-## Model Requirements
-
-| Mode | Min Model Size | Reason |
-|------|---------------|--------|
-| Correction | 0.5B Q8 | Simple homophone fixes |
-| Polish | 1.5B+ | Needs sentence-level understanding |
-| Translate | 3B+ | Cross-lingual requires more parameters |
-| Email/Freewrite | 3B+ | Creative generation needs capacity |
-
-**Recommendation:** Ship with Qwen2.5-3B-Instruct Q4 (~2GB) as the default. It handles all modes well. Keep 0.5B as a lightweight option for correction-only users.
-
-For users with powerful GPUs, allow Qwen2.5-7B (~4GB) for best quality.
-
-## Implementation Order
-
-### Phase 1: Mode infrastructure (no new models needed)
-1. Create `modes.rs` with built-in mode registry
-2. Create `command.rs` with safeword detection
-3. Rename corrector to general LLM processor
-4. Add mode dropdown to Tauri UI
-5. Add `default_mode` to config
-6. Wire mode switching into session loop
-
-### Phase 2: Better model
-7. Download and test Qwen2.5-3B Q4 (~2GB GGUF)
-8. Add model selector in settings (0.5B / 3B / 7B)
-9. Benchmark latency per mode on Apple Silicon vs CPU
-
-### Phase 3: Advanced
-10. Custom mode editor in UI (user writes own system prompts)
-11. Context carry-over (previous sentences inform translation context)
-12. Streaming LLM output (show correction/translation in real-time)
-13. Tool call support (voice-triggered actions beyond text: "Toff, 搜索天气")
+### Our Unique Position
+**The only fully offline voice-to-structured-text tool.** Combines real-time transcription (Fast Mode) with AI-powered rewriting (Think Mode). No subscription, no cloud dependency, no data leaves the device.
 
 ## Example User Flows
 
-### Flow 1: Default correction mode
+### Flow 1: Fast Mode (Chat)
 ```
-[User sets default mode to "纠错" in settings]
-[Double-shift to record]
-User: "今天的天汽很好，我想去公园"
-Pipeline: Whisper → "今天的天汽很好" → LLM(correct) → "今天的天气很好" → paste
-```
-
-### Flow 2: Voice-triggered translate
-```
-[Recording]
-User: "Toff, 翻译成英文"
-Pipeline: Whisper → "Toff, 翻译成英文" → command detected → switch to translate_en
-[Still recording]
-User: "今天天气很好，我们去公园吧"
-Pipeline: Whisper → "今天天气很好" → LLM(translate_en) → "The weather is nice today, let's go to the park" → paste
+[Fast Mode active]
+User: "今天下午三点开会，别忘了"
+→ Paste: "今天下午三点开会，别忘了"
+(Real-time, literal, filler-removed)
 ```
 
-### Flow 3: Email mode
+### Flow 2: Think Mode (Email)
 ```
-User: "Toff, 写邮件"
-Pipeline: switch to email mode
-User: "跟老板说这周五的会议改到下周一"
-Pipeline: Whisper → LLM(email) →
-  "Dear [Boss],
-   I would like to request that Friday's meeting be rescheduled to next Monday.
-   Please let me know if this works for you.
-   Best regards" → paste
+[Think Mode active]
+User: "嗯，那个，我想跟老板说一下，就是这周五的会议，
+       啊，能不能改到下周一，因为，嗯，我这边有个客户要来，
+       对，就是那个大客户，所以周五走不开"
+
+→ Whisper: "嗯那个我想跟老板说一下就是这周五的会议啊能不能改到下周一
+            因为嗯我这边有个客户要来对就是那个大客户所以周五走不开"
+
+→ LLM rewrite: "这周五的会议能否改到下周一？我周五有重要客户来访，无法参加。"
+
+→ Paste: "这周五的会议能否改到下周一？我周五有重要客户来访，无法参加。"
 ```
 
-### Flow 4: Reset to default
+### Flow 3: Think Mode with Correction
 ```
-User: "Toff, 恢复"
-Pipeline: switch back to default mode (correction)
+[Think Mode active]
+User: "这个项目的预算是50万，啊不对，是80万，
+       主要花在三个方面，第一是人力成本，第二是设备采购，
+       第三是...嗯...第三是场地租赁"
+
+→ LLM understands "啊不对是80万" is a correction
+
+→ Paste: "项目预算80万，主要分三部分：
+          1. 人力成本
+          2. 设备采购
+          3. 场地租赁"
+```
+
+### Flow 4: Voice-triggered Mode Switch
+```
+[Fast Mode active]
+User: "Toff, 整理模式"
+→ Switch to Think Mode (no paste)
+
+User: [speaks for 2 minutes about project update]
+
+→ LLM produces structured project update
+
+User: "Toff, 快速模式"
+→ Switch back to Fast Mode
 ```
