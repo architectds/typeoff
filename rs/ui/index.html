@@ -461,6 +461,7 @@
       await populateSettings();
       await initAutostart();
       await checkModelStatus();
+      await checkPermissions();
     } catch(e) {
       setTimeout(init, 500);
     }
@@ -506,6 +507,43 @@
       document.getElementById('textContent').innerHTML =
         `<div style="text-align:center; padding: 20px 0; color: #f38ba8;">Download failed: ${e}</div>`;
     }
+  }
+
+  // ─── Permission check ───
+  async function checkPermissions() {
+    try {
+      const perms = await invoke('check_permissions');
+      if (!perms.accessibility) {
+        // Show permission setup banner above the text area
+        const banner = document.createElement('div');
+        banner.id = 'permBanner';
+        banner.style.cssText = 'margin: 8px 20px 0; padding: 10px 14px; background: rgba(250,179,135,0.12); border: 1px solid rgba(250,179,135,0.3); border-radius: 10px;';
+        banner.innerHTML = `
+          <div style="font-size: 12px; color: #fab387; font-weight: 600; margin-bottom: 4px;">⚠ Accessibility Permission Required</div>
+          <div style="font-size: 11px; color: #a6adc8; margin-bottom: 8px;">
+            Typeoff needs Accessibility permission to paste text into other apps.<br>
+            Click below to open Settings, then add Typeoff (or Terminal) to the list.
+          </div>
+          <button class="btn" style="font-size: 11px; padding: 5px 12px; color: #fab387; border-color: rgba(250,179,135,0.3);" onclick="openAccessibility()">
+            Open Accessibility Settings
+          </button>
+          <button class="btn" style="font-size: 11px; padding: 5px 12px; margin-left: 6px;" onclick="dismissPermBanner()">
+            Dismiss
+          </button>
+        `;
+        const textArea = document.querySelector('.text-area');
+        textArea.parentNode.insertBefore(banner, textArea);
+      }
+    } catch(e) {}
+  }
+
+  async function openAccessibility() {
+    await invoke('open_accessibility_settings');
+  }
+
+  function dismissPermBanner() {
+    const banner = document.getElementById('permBanner');
+    if (banner) banner.remove();
   }
 
   // ─── Settings population ───

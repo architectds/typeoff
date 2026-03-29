@@ -138,7 +138,54 @@ fn get_hotkeys_list() -> Vec<HotkeyInfo> {
     ]
 }
 
+// ─── Permission Checks ───────────────────────────────────────────
+
+#[derive(Serialize)]
+struct PermissionStatus {
+    accessibility: bool,
+    microphone: bool,
+}
+
+#[cfg(target_os = "macos")]
+fn check_accessibility() -> bool {
+    // AXIsProcessTrusted() returns true if Accessibility permission is granted
+    use std::process::Command;
+    // Use osascript to test if System Events is accessible
+    let output = Command::new("osascript")
+        .arg("-e")
+        .arg("tell application \"System Events\" to return name of first process")
+        .output();
+    match output {
+        Ok(o) => o.status.success(),
+        Err(_) => false,
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn check_accessibility() -> bool {
+    true // Not needed on Windows/Linux
+}
+
 // ─── Tauri Commands ──────────────────────────────────────────────
+
+#[tauri::command]
+fn check_permissions() -> PermissionStatus {
+    PermissionStatus {
+        accessibility: check_accessibility(),
+        microphone: true, // macOS auto-prompts for mic
+    }
+}
+
+/// Open macOS System Preferences to the Accessibility pane
+#[tauri::command]
+fn open_accessibility_settings() {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("open")
+            .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
+            .spawn();
+    }
+}
 
 #[tauri::command]
 fn get_state(state: tauri::State<TauriState>) -> AppState {
@@ -583,6 +630,8 @@ pub fn run() {
             get_hotkeys,
             check_model,
             download_model,
+            check_permissions,
+            open_accessibility_settings,
             toggle_recording,
         ])
         .setup(|app| {
