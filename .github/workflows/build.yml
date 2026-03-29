@@ -22,7 +22,7 @@ jobs:
           path: rs/target/release/bundle/dmg/*.dmg
 
   build-mac-intel:
-    runs-on: macos-13  # Intel Mac runner
+    runs-on: macos-13  # Intel Mac runner (last Intel runner available)
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -57,9 +57,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Install CUDA Toolkit
-        uses: Jimver/cuda-toolkit@v0.2.16
+        uses: Jimver/cuda-toolkit@v0.2.22
         with:
-          cuda: '12.6.0'
+          cuda: '12.4.0'
+          method: 'network'
       - run: cargo install tauri-cli
       - name: Build (CUDA GPU)
         working-directory: rs
