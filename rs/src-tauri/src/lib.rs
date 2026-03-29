@@ -3,6 +3,7 @@ use std::panic;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
+use tauri::image::Image as TauriImage;
 use tauri::Manager;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::TrayIconBuilder;
@@ -44,6 +45,25 @@ pub struct TauriState {
     pub state: Arc<Mutex<AppState>>,
     pub config: Arc<Mutex<Config>>,
     pub transcriber: Arc<Mutex<Option<Transcriber>>>,
+    pub app_handle: Arc<Mutex<Option<tauri::AppHandle>>>,
+}
+
+// Tray icon IDs
+const TRAY_ID: &str = "typeoff-tray";
+
+fn set_tray_recording(app: &tauri::AppHandle, recording: bool) {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        let icon_bytes = if recording {
+            include_bytes!("../icons/toff_tray_recording.png").as_slice()
+        } else {
+            include_bytes!("../icons/toff_tray_idle.png").as_slice()
+        };
+        if let Ok(icon) = TauriImage::from_bytes(icon_bytes) {
+            let _ = tray.set_icon(Some(icon));
+        }
+        let tooltip = if recording { "Typeoff — Recording..." } else { "Typeoff — Double Shift to record" };
+        let _ = tray.set_tooltip(Some(tooltip));
+    }
 }
 
 // ─── Models / Languages / Hotkeys lists ──────────────────────────
@@ -144,12 +164,17 @@ fn toggle_recording(state: tauri::State<TauriState>) {
 
             state.state.lock().unwrap().status = "recording".into();
 
+            // Switch tray icon to recording
+            if let Some(ref app) = *state.app_handle.lock().unwrap() {
+                set_tray_recording(app, true);
+            }
+
             let app_state = Arc::clone(&state.state);
             let config = state.config.lock().unwrap().clone();
             let transcriber = Arc::clone(&state.transcriber);
+            let app_handle = Arc::clone(&state.app_handle);
 
             thread::spawn(move || {
-                // catch_unwind so panics don't kill the app — just reset state
                 let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
                     run_session(&config, &transcriber, &app_state);
                 }));
@@ -158,11 +183,15 @@ fn toggle_recording(state: tauri::State<TauriState>) {
                     eprintln!("[typeoff] Session panicked: {:?}", e);
                 }
 
-                // Always ensure state returns to ready, even after panic
                 let mut s = app_state.lock().unwrap();
                 s.status = "ready".into();
                 s.message = "Ready".into();
                 s.rms = 0.0;
+
+                // Switch tray icon back to idle
+                if let Some(ref app) = *app_handle.lock().unwrap() {
+                    set_tray_recording(app, false);
+                }
             });
         }
         _ => {}
@@ -324,6 +353,7 @@ pub fn run() {
         state: Arc::new(Mutex::new(AppState::default())),
         config: Arc::new(Mutex::new(config.clone())),
         transcriber: Arc::new(Mutex::new(None)),
+        app_handle: Arc::new(Mutex::new(None)),
     };
 
     // Load model in background
@@ -343,6 +373,7 @@ pub fn run() {
     let state_hotkey = Arc::clone(&tauri_state.state);
     let config_hotkey = Arc::clone(&tauri_state.config);
     let transcriber_hotkey = Arc::clone(&tauri_state.transcriber);
+    let app_handle_hotkey = Arc::clone(&tauri_state.app_handle);
 
     thread::spawn(move || {
         let (tx, rx) = std::sync::mpsc::channel::<()>();
@@ -363,9 +394,15 @@ pub fn run() {
                     }
                     state_hotkey.lock().unwrap().status = "recording".into();
 
+                    // Switch tray to recording
+                    if let Some(ref app) = *app_handle_hotkey.lock().unwrap() {
+                        set_tray_recording(app, true);
+                    }
+
                     let app_state = Arc::clone(&state_hotkey);
                     let config = config_hotkey.lock().unwrap().clone();
                     let transcriber = Arc::clone(&transcriber_hotkey);
+                    let app_handle = Arc::clone(&app_handle_hotkey);
 
                     thread::spawn(move || {
                         let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
@@ -378,6 +415,11 @@ pub fn run() {
                         s.status = "ready".into();
                         s.message = "Ready".into();
                         s.rms = 0.0;
+
+                        // Switch tray back to idle
+                        if let Some(ref app) = *app_handle.lock().unwrap() {
+                            set_tray_recording(app, false);
+                        }
                     });
                 }
                 _ => {}
@@ -404,6 +446,10 @@ pub fn run() {
             toggle_recording,
         ])
         .setup(|app| {
+            // Store app handle for tray icon switching from background threads
+            let state: tauri::State<TauriState> = app.state();
+            *state.app_handle.lock().unwrap() = Some(app.handle().clone());
+
             // ─── System Tray ─────────────────────────────────
             let show = MenuItemBuilder::with_id("show", "Show Typeoff").build(app)?;
             let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
@@ -413,8 +459,10 @@ pub fn run() {
                 .item(&quit)
                 .build()?;
 
-            let _tray = TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
+            let idle_icon = TauriImage::from_bytes(include_bytes!("../icons/toff_tray_idle.png"))?;
+
+            let _tray = TrayIconBuilder::with_id(TRAY_ID)
+                .icon(idle_icon)
                 .menu(&menu)
                 .tooltip("Typeoff — Double Shift to record")
                 .on_menu_event(|app, event| {
