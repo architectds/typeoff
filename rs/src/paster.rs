@@ -43,15 +43,24 @@ pub fn paste_text(text: &str) {
 
 #[cfg(target_os = "macos")]
 fn paste_macos() {
-    // Small delay to let the target app regain focus after any window changes
-    thread::sleep(Duration::from_millis(100));
+    // Small delay to let the target app regain focus
+    thread::sleep(Duration::from_millis(150));
 
     // Use osascript to send Cmd+V to the frontmost app
-    // This requires Accessibility permission for System Events
-    let _ = std::process::Command::new("osascript")
+    let output = std::process::Command::new("osascript")
         .arg("-e")
         .arg("tell application \"System Events\" to keystroke \"v\" using command down")
         .output();
+
+    match output {
+        Ok(o) => {
+            if !o.status.success() {
+                let stderr = String::from_utf8_lossy(&o.stderr);
+                eprintln!("[typeoff] Paste failed: {}", stderr);
+            }
+        }
+        Err(e) => eprintln!("[typeoff] Paste error: {}", e),
+    }
 }
 
 #[cfg(target_os = "windows")]

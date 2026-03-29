@@ -340,6 +340,10 @@ fn toggle_recording(state: tauri::State<TauriState>) {
     match current_status.as_str() {
         "recording" => {
             state.state.lock().unwrap().status = "stopping".into();
+            // Switch tray icon back to idle immediately
+            if let Some(ref app) = *state.app_handle.lock().unwrap() {
+                set_tray_recording(app, false);
+            }
         }
         "ready" => {
             let has_model = state.transcriber.lock().unwrap().is_some();
@@ -571,6 +575,10 @@ pub fn run() {
             match current_status.as_str() {
                 "recording" => {
                     state_hotkey.lock().unwrap().status = "stopping".into();
+                    // Switch tray icon back to idle immediately
+                    if let Some(ref app) = *app_handle_hotkey.lock().unwrap() {
+                        set_tray_recording(app, false);
+                    }
                 }
                 "ready" => {
                     let has_model = transcriber_hotkey.lock().unwrap().is_some();
