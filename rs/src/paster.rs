@@ -43,23 +43,32 @@ pub fn paste_text(text: &str) {
 
 #[cfg(target_os = "macos")]
 fn paste_macos() {
-    // Small delay to let the target app regain focus
     thread::sleep(Duration::from_millis(150));
 
-    // Use osascript to send Cmd+V to the frontmost app
+    // Try osascript first (needs Accessibility permission for parent process)
     let output = std::process::Command::new("osascript")
         .arg("-e")
         .arg("tell application \"System Events\" to keystroke \"v\" using command down")
         .output();
 
     match output {
+        Ok(o) if o.status.success() => return,
         Ok(o) => {
-            if !o.status.success() {
-                let stderr = String::from_utf8_lossy(&o.stderr);
-                eprintln!("[typeoff] Paste failed: {}", stderr);
-            }
+            let stderr = String::from_utf8_lossy(&o.stderr);
+            eprintln!("[typeoff] osascript paste blocked: {}", stderr);
+            eprintln!("[typeoff] Falling back to enigo...");
         }
-        Err(e) => eprintln!("[typeoff] Paste error: {}", e),
+        Err(e) => {
+            eprintln!("[typeoff] osascript error: {}", e);
+        }
+    }
+
+    // Fallback: try enigo (also needs Accessibility but different code path)
+    use enigo::{Enigo, Key, Keyboard, Settings};
+    if let Ok(mut enigo) = Enigo::new(&Settings::default()) {
+        let _ = enigo.key(Key::Meta, enigo::Direction::Press);
+        let _ = enigo.key(Key::Unicode('v'), enigo::Direction::Click);
+        let _ = enigo.key(Key::Meta, enigo::Direction::Release);
     }
 }
 
