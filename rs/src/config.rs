@@ -20,7 +20,7 @@ pub struct Config {
     pub sample_rate: u32,
     #[serde(default)]
     pub model_path: Option<String>,
-    #[serde(default)]
+    #[serde(default = "default_use_gpu")]
     pub use_gpu: bool,
     #[serde(default = "default_correction_mode")]
     pub correction_mode: String,
@@ -34,6 +34,15 @@ fn default_silence_duration() -> f32 { 3.0 }
 fn default_max_duration() -> f32 { 60.0 }
 fn default_sample_rate() -> u32 { 16000 }
 fn default_correction_mode() -> String { "off".into() }
+fn default_use_gpu() -> bool { cfg!(any(feature = "cuda", feature = "metal")) }
+
+fn normalize_language(language: Option<String>) -> Option<String> {
+    match language.as_deref().map(str::trim) {
+        Some("") | Some("auto") => None,
+        Some(value) => Some(value.to_string()),
+        None => None,
+    }
+}
 
 impl Default for Config {
     fn default() -> Self {
@@ -46,7 +55,7 @@ impl Default for Config {
             max_duration: default_max_duration(),
             sample_rate: default_sample_rate(),
             model_path: None,
-            use_gpu: false,
+            use_gpu: default_use_gpu(),
             correction_mode: default_correction_mode(),
             correction_model_path: None,
         }
@@ -54,6 +63,11 @@ impl Default for Config {
 }
 
 impl Config {
+    fn normalize(mut self) -> Self {
+        self.language = normalize_language(self.language.take());
+        self
+    }
+
     pub fn config_path() -> PathBuf {
         let mut p = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
         p.push("Typeoff");
@@ -65,9 +79,9 @@ impl Config {
     pub fn load() -> Self {
         let path = Self::config_path();
         match fs::read_to_string(&path) {
-            Ok(content) => serde_json::from_str(&content).unwrap_or_default(),
+            Ok(content) => serde_json::from_str::<Self>(&content).unwrap_or_default().normalize(),
             Err(_) => {
-                let config = Self::default();
+                let config = Self::default().normalize();
                 config.save();
                 config
             }
@@ -76,8 +90,15 @@ impl Config {
 
     pub fn save(&self) {
         let path = Self::config_path();
-        if let Ok(json) = serde_json::to_string_pretty(self) {
+        if let Ok(json) = serde_json::to_string_pretty(&self.clone().normalize()) {
             fs::write(path, json).ok();
+        }
+    }
+
+    pub fn effective_language(&self) -> Option<&str> {
+        match self.language.as_deref().map(str::trim) {
+            Some("") | Some("auto") | None => None,
+            Some(language) => Some(language),
         }
     }
 

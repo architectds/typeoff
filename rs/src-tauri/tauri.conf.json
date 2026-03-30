@@ -18,7 +18,7 @@
         "transparent": false,
         "center": true,
         "acceptFirstMouse": true,
-        "visible": false
+        "visible": true
       }
     ],
     "security": {

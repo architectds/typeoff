@@ -67,7 +67,7 @@ impl Corrector {
             }
         };
 
-        let mut params = LlamaModelParams::default();
+        let params = LlamaModelParams::default();
 
         // Disable GPU on non-Apple-Silicon Macs (AMD Radeon produces garbage)
         #[cfg(target_os = "macos")]

@@ -24,6 +24,8 @@ use typeoff::vad::Vad;
 pub struct AppState {
     pub status: String,
     pub text: String,
+    pub confirmed_text: String,
+    pub pending_text: String,
     pub elapsed: f32,
     pub message: String,
     pub rms: f32,
@@ -34,6 +36,8 @@ impl Default for AppState {
         Self {
             status: "loading".into(),
             text: String::new(),
+            confirmed_text: String::new(),
+            pending_text: String::new(),
             elapsed: 0.0,
             message: "Loading model...".into(),
             rms: 0.0,
@@ -50,6 +54,17 @@ pub struct TauriState {
 
 // Tray icon IDs
 const TRAY_ID: &str = "typeoff-tray";
+
+fn sync_text_state(state: &Arc<Mutex<AppState>>, streamer: &StreamingTranscriber) {
+    let confirmed_text = streamer.confirmed_text();
+    let pending_text = streamer.pending_display_text();
+    let display_text = format!("{}{}", confirmed_text, pending_text);
+
+    let mut app_state = state.lock().unwrap();
+    app_state.confirmed_text = confirmed_text;
+    app_state.pending_text = pending_text;
+    app_state.text = display_text;
+}
 
 fn set_tray_recording(app: &tauri::AppHandle, recording: bool) {
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
@@ -392,7 +407,7 @@ fn run_session(
     transcriber: &Arc<Mutex<Option<Transcriber>>>,
     state: &Arc<Mutex<AppState>>,
 ) {
-    let mut recorder = Recorder::new(config.sample_rate);
+    let mut recorder = Recorder::new(config.sample_rate, config.max_duration);
     let vad = Vad::new(config.silence_duration, config.sample_rate);
     let mut streamer = StreamingTranscriber::new();
     let mut corrector = Corrector::new(
@@ -404,6 +419,8 @@ fn run_session(
         let mut s = state.lock().unwrap();
         s.status = "recording".into();
         s.text.clear();
+        s.confirmed_text.clear();
+        s.pending_text.clear();
         s.elapsed = 0.0;
         s.message = "Listening...".into();
         s.rms = 0.0;
@@ -422,17 +439,13 @@ fn run_session(
             break;
         }
 
-        let audio = recorder.get_audio();
-        let duration = audio.len() as f32 / config.sample_rate as f32;
+        let duration = recorder.len_samples() as f32 / config.sample_rate as f32;
         let elapsed = start.elapsed().as_secs_f32();
 
         {
             let mut s = state.lock().unwrap();
             s.elapsed = elapsed;
-            if audio.len() > 1600 {
-                let tail = &audio[audio.len() - 1600..];
-                s.rms = (tail.iter().map(|x| x * x).sum::<f32>() / tail.len() as f32).sqrt();
-            }
+            s.rms = recorder.tail_rms(1600);
         }
 
         if duration > config.max_duration {
@@ -440,21 +453,30 @@ fn run_session(
         }
 
         if config.auto_stop_silence && duration > config.silence_duration + 1.0 {
-            if vad.has_speech(&audio) && vad.detect_end_of_speech(&audio) {
+            let should_stop = recorder.with_audio(|audio| {
+                vad.has_speech(audio) && vad.detect_end_of_speech(audio)
+            });
+            if should_stop {
                 break;
             }
         }
 
         if duration >= 1.5 && last_transcribe.elapsed() >= Duration::from_secs(3) {
-            if !vad.has_speech(&audio) {
+            let has_speech = recorder.with_audio(|audio| vad.has_speech(audio));
+            if !has_speech {
                 continue;
             }
 
-            let filtered = audio_filter::voice_filter(&audio, config.sample_rate);
+            let window_audio = recorder.snapshot_from(streamer.window_start_sample());
+            if window_audio.is_empty() {
+                continue;
+            }
+
+            let filtered = audio_filter::voice_filter(&window_audio, config.sample_rate);
 
             let transcriber_guard = transcriber.lock().unwrap();
             if let Some(ref t) = *transcriber_guard {
-                let lang = config.language.as_deref();
+                let lang = config.effective_language();
                 let (new_sentence, _pending) = streamer.rolling_transcribe(&filtered, t, lang);
                 drop(transcriber_guard);
                 last_transcribe = Instant::now();
@@ -471,10 +493,7 @@ fn run_session(
                     }
                 }
 
-                let display = streamer.get_display_text();
-                if !display.is_empty() {
-                    state.lock().unwrap().text = display;
-                }
+                sync_text_state(state, &streamer);
             }
         }
     }
@@ -493,15 +512,22 @@ fn run_session(
         s.status = "ready".into();
         s.message = "No speech detected".into();
         s.text.clear();
+        s.confirmed_text.clear();
+        s.pending_text.clear();
         return;
     }
 
     let audio = audio_filter::voice_filter(&raw_audio, config.sample_rate);
+    let final_window = if streamer.window_start_sample() < audio.len() {
+        &audio[streamer.window_start_sample()..]
+    } else {
+        &[][..]
+    };
 
     let transcriber_guard = transcriber.lock().unwrap();
     if let Some(ref t) = *transcriber_guard {
-        let lang = config.language.as_deref();
-        let (remainder, full_text) = streamer.final_transcribe(&audio, t, lang);
+        let lang = config.effective_language();
+        let (remainder, full_text) = streamer.final_transcribe(final_window, t, lang);
         drop(transcriber_guard);
 
         if config.auto_paste {
@@ -521,6 +547,8 @@ fn run_session(
         {
             let mut s = state.lock().unwrap();
             s.status = "done".into();
+            s.confirmed_text = full_text.clone();
+            s.pending_text.clear();
             s.text = full_text;
             s.message = "Done!".into();
         }

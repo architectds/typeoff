@@ -155,11 +155,10 @@ impl StreamingTranscriber {
     /// Port of Python rolling_transcribe.
     pub fn rolling_transcribe(
         &mut self,
-        full_audio: &[f32],
+        window: &[f32],
         transcriber: &Transcriber,
         language: Option<&str>,
     ) -> (Option<String>, String) {
-        let window = &full_audio[self.window_start_sample..];
         if window.len() < 8000 {
             // < 0.5s
             return (None, self.pending_text.clone());
@@ -274,11 +273,10 @@ impl StreamingTranscriber {
     /// Port of Python final_transcribe.
     pub fn final_transcribe(
         &mut self,
-        full_audio: &[f32],
+        window: &[f32],
         transcriber: &Transcriber,
         language: Option<&str>,
     ) -> (Option<String>, String) {
-        let window = &full_audio[self.window_start_sample..];
         if window.len() < 4800 {
             // < 0.3s
             return (None, self.locked_text.clone());
@@ -316,6 +314,23 @@ impl StreamingTranscriber {
         } else {
             format!("{}{}", self.locked_text, raw)
         }
+    }
+
+    pub fn confirmed_text(&self) -> String {
+        self.locked_text.clone()
+    }
+
+    pub fn pending_display_text(&self) -> String {
+        let raw = join_tokens(&self.prev_words);
+        if raw.is_empty() {
+            self.pending_text.clone()
+        } else {
+            raw
+        }
+    }
+
+    pub fn window_start_sample(&self) -> usize {
+        self.window_start_sample
     }
 
     pub fn reset(&mut self) {

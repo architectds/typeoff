@@ -16,7 +16,6 @@ pub struct Transcriber {
 }
 
 unsafe impl Send for Transcriber {}
-unsafe impl Sync for Transcriber {}
 
 impl Transcriber {
     pub fn new(config: &Config) -> Self {
@@ -58,7 +57,7 @@ impl Transcriber {
 
         Self {
             ctx,
-            language: config.language.clone(),
+            language: config.effective_language().map(str::to_string),
         }
     }
 

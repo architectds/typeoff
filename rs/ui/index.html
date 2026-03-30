@@ -118,6 +118,8 @@
     word-wrap: break-word;
     -webkit-user-select: text; user-select: text; -webkit-app-region: no-drag;
   }
+  .text-confirmed { color: #cdd6f4; }
+  .text-pending { color: #89b4fa; opacity: 0.92; }
   .text-content.empty { color: #585b70; font-style: italic; }
   .cursor-blink {
     display: inline-block; width: 2px; height: 15px;
@@ -191,6 +193,14 @@
 
   .setting-label {
     font-size: 12px; color: #cdd6f4;
+  }
+  .setting-value {
+    font-size: 11px;
+    color: #a6adc8;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
   }
 
   .setting-desc {
@@ -277,13 +287,13 @@
 
     <div class="text-area">
       <div class="text-content empty" id="textContent">
-        Press <kbd>Ctrl+Space</kbd> to start recording
+        Press <kbd>Shift</kbd> + <kbd>Shift</kbd> to start recording
       </div>
     </div>
 
     <div class="footer">
       <div class="hotkey-hint" id="hotkeyHint">
-        <kbd>Ctrl</kbd> + <kbd>Space</kbd>
+        <kbd>Shift</kbd> + <kbd>Shift</kbd>
       </div>
       <div class="btn-row">
         <button class="btn" id="btnCopy" onclick="copyText()">Copy</button>
@@ -321,8 +331,11 @@
       <div class="settings-section">
         <div class="settings-section-title">Audio</div>
         <div class="setting-row">
-          <div class="setting-label">Microphone</div>
-          <select class="setting-select" id="setDevice"></select>
+          <div>
+            <div class="setting-label">Microphone</div>
+            <div class="setting-desc">Rust backend currently records from the system default input device</div>
+          </div>
+          <div class="setting-value">System Default</div>
         </div>
       </div>
 
@@ -330,18 +343,11 @@
       <div class="settings-section">
         <div class="settings-section-title">Keyboard Shortcut</div>
         <div class="setting-row">
-          <div class="setting-label">Hotkey</div>
-          <select class="setting-select" id="setHotkey"></select>
-        </div>
-        <div class="setting-row">
           <div>
-            <div class="setting-label">Recording Mode</div>
-            <div class="setting-desc">Toggle: press to start/stop. Push-to-talk: hold to record</div>
+            <div class="setting-label">Hotkey</div>
+            <div class="setting-desc">The current Rust app listens for Double Shift only</div>
           </div>
-          <select class="setting-select" id="setRecordMode" style="min-width:120px">
-            <option value="toggle">Toggle</option>
-            <option value="push_to_talk">Push to Talk</option>
-          </select>
+          <div class="setting-value">Double Shift</div>
         </div>
       </div>
 
@@ -424,21 +430,6 @@
           </div>
           <label class="setting-toggle">
             <input type="checkbox" id="setAutostart" onchange="toggleAutostart()">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Debug -->
-      <div class="settings-section">
-        <div class="settings-section-title">Debug</div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Verbose logging</div>
-            <div class="setting-desc">Show detailed logs in console</div>
-          </div>
-          <label class="setting-toggle">
-            <input type="checkbox" id="setVerbose">
             <span class="slider"></span>
           </label>
         </div>
@@ -569,29 +560,15 @@
     // Languages
     const langs = await invoke('get_languages');
     const selLang = document.getElementById('setLanguage');
+    const selectedLanguage = config.language || 'auto';
     selLang.innerHTML = langs.map(l =>
-      `<option value="${l.id}" ${l.id === config.language ? 'selected' : ''}>${l.name}</option>`
+      `<option value="${l.id}" ${l.id === selectedLanguage ? 'selected' : ''}>${l.name}</option>`
     ).join('');
-
-    // Devices — skip for now (not implemented in Rust backend)
-    const selDev = document.getElementById('setDevice');
-    selDev.innerHTML = `<option value="">System Default</option>`;
-
-    // Hotkeys
-    const hotkeys = await invoke('get_hotkeys');
-    const selHk = document.getElementById('setHotkey');
-    selHk.innerHTML = hotkeys.map(h =>
-      `<option value="${h.id}" ${h.id === config.hotkey ? 'selected' : ''}>${h.name}</option>`
-    ).join('');
-
-    // Record mode
-    document.getElementById('setRecordMode').value = config.record_mode || 'toggle';
 
     // Toggles
     document.getElementById('setAutoPaste').checked = config.auto_paste !== false;
     document.getElementById('setAutoStop').checked = config.auto_stop_silence !== false;
     document.getElementById('setUseGpu').checked = config.use_gpu === true;
-    document.getElementById('setVerbose').checked = config.verbose === true;
     document.getElementById('setCorrectionMode').value = config.correction_mode || 'off';
 
     // Silence duration
@@ -610,9 +587,7 @@
   }
 
   function updateHotkeyHint() {
-    const hk = (config.hotkey || 'double_shift').replace('double_shift', 'Shift+Shift')
-      .split('+').map(k => `<kbd>${k.charAt(0).toUpperCase() + k.slice(1)}</kbd>`).join(' + ');
-    document.getElementById('hotkeyHint').innerHTML = hk;
+    document.getElementById('hotkeyHint').innerHTML = '<kbd>Shift</kbd> + <kbd>Shift</kbd>';
   }
 
   // ─── Autostart ───
@@ -640,7 +615,6 @@
     const newConfig = {
       model: document.getElementById('setModel').value,
       language: document.getElementById('setLanguage').value,
-      hotkey: document.getElementById('setHotkey').value,
       use_gpu: document.getElementById('setUseGpu').checked,
       auto_paste: document.getElementById('setAutoPaste').checked,
       auto_stop_silence: document.getElementById('setAutoStop').checked,
@@ -719,7 +693,18 @@
 
     if (state.text) {
       textContent.className = 'text-content';
-      let html = escapeHtml(state.text);
+      const confirmed = escapeHtml(state.confirmed_text || '');
+      const pending = escapeHtml(state.pending_text || '');
+      let html = '';
+      if (confirmed) {
+        html += `<span class="text-confirmed">${confirmed}</span>`;
+      }
+      if (pending) {
+        html += `<span class="text-pending">${pending}</span>`;
+      }
+      if (!html) {
+        html = escapeHtml(state.text);
+      }
       if (state.status === 'recording' || state.status === 'transcribing') {
         html += '<span class="cursor-blink"></span>';
       }
